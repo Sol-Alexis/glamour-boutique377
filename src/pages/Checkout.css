@@ -1,0 +1,148 @@
+/* Container */
+.checkout-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.checkout-heading {
+  font-size: 2.5rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-align: left;
+}
+
+/* Section titles */
+.checkout-section-title {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #f0f0f0;
+  color: #111;
+}
+
+/* Form fields */
+.checkout-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.checkout-input {
+  width: 100%;
+  height: 3.2rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.3rem; /* Sharper edges for boutique feel */
+  padding: 0 1rem;
+  font-size: 0.95rem;
+  background-color: #fff;
+  transition: all 0.2s ease;
+}
+
+.checkout-input:focus {
+  border-color: #000;
+  box-shadow: 0 0 0 1px #000;
+  outline: none;
+}
+
+/* Radio group for Telebirr & CBE */
+.checkout-radio-group {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+.checkout-radio-option {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.checkout-radio-option:has([data-state="checked"]) {
+  border-color: #000;
+  background-color: #f8fafc;
+}
+
+.checkout-radio-option:hover {
+  background: #f9f9f9;
+}
+
+.checkout-logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 4px;
+}
+
+/* Order summary card */
+.checkout-summary {
+  background: #ffffff;
+  border: 1px solid #f0f0f0;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  position: sticky;
+  top: 6rem;
+}
+
+/* Item details */
+.checkout-item {
+  display: flex;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #f8f8f8;
+}
+
+.checkout-item img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 0.25rem;
+}
+
+.checkout-item-details p {
+  line-height: 1.2;
+}
+
+/* Place order button */
+.checkout-button {
+  width: 100%;
+  margin-top: 1.5rem;
+  background: #000;
+  color: #fff;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 0; /* Square buttons look more 'luxury' */
+  padding: 1rem;
+  transition: background 0.3s ease;
+}
+
+.checkout-button:hover {
+  background: #333;
+}
+/* Custom color for the Terms text */
+.terms-label {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  /* CHANGE THIS COLOR TO WHATEVER YOU LIKE */
+  color: #4b5563; 
+}
+
+.terms-label span {
+  /* This colors the "Terms and Conditions" link specifically */
+  color: #bb1414; 
+}
+
+/* Extra spacing for the terms section */
+.py-8 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+}

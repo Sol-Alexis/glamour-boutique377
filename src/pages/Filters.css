@@ -1,0 +1,149 @@
+/* The Main Row Wrapper */
+.modern-action-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  width: 90%;          /* Perfect gap from left/right */
+  max-width: 1200px; 
+  margin: 3rem auto;   /* Centers the row vertically and horizontally */
+}
+
+.action-item {
+  flex: 1;
+  position: relative;
+}
+
+/* Base style for all 4 items - Fully Rounded */
+.action-btn-outline,
+.action-btn-black,
+.action-btn-outline-black {
+  width: 100%;
+  height: 56px;           /* Slightly taller for better touch/click feel */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 1.8rem;
+  border-radius: 999px;   /* This makes them perfectly rounded (Pill Shape) */
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  transition: all 0.3s cubic-bezier(0.2, 0, 0, 1);
+  cursor: pointer;
+}
+
+/* Specific button themes */
+.action-btn-outline {
+  background: #fff;
+  border: 1px solid #e5e5e5;
+  color: #000;
+  justify-content: space-between; /* Keeps text left and chevron right */
+}
+
+.action-btn-black {
+  background: red;
+  color: #fff;
+  border: 1px solid #000;
+}
+
+.action-btn-outline-black {
+  background: transparent;
+  color: #000;
+  border: 1px solid #000;
+}
+
+/* Hover States */
+.action-btn-outline:hover { 
+  border-color: #000;
+  background-color: #fcfcfc;
+}
+
+.action-btn-black:hover { 
+  background: #333; 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.action-btn-outline-black:hover { 
+  background: #000; 
+  color: #fff; 
+  transform: translateY(-2px);
+}
+
+/* THE DROPDOWN - Modern Rounded Menu */
+.filter-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 12px); /* Positioned below with a small air gap */
+  left: 0;
+  width: 100%;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 20px;   /* Rounded corners for the menu itself */
+  padding: 12px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+  z-index: 100;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Option Buttons inside the menu */
+.opt-btn {
+  height: 42px;
+  border: 1px solid #f0f0f0;
+  background: white;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 12px;   /* Rounded options */
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.opt-btn:hover { 
+  border-color: #000; 
+  background-color: #f9f9f9;
+}
+
+.opt-btn.active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* Mobile: Stack them nicely */
+@media (max-width: 850px) {
+  .modern-action-row {
+    flex-direction: column;
+    width: 95%;
+    gap: 0.75rem;
+  }
+}
+.selected-product-view {
+  padding-top: 4rem;
+  /* Add significant padding to the bottom to 'hold' the dropdowns */
+  padding-bottom: 12rem; 
+  border-top: 1px solid #eee;
+  background: #fff;
+}
+.product-filters-container {
+  display: flex;
+  flex-direction: row; /* Forces horizontal alignment */
+  align-items: center;
+  gap: 1.5rem;         /* Space between the filters */
+  flex-wrap: nowrap;   /* Prevents them from jumping to the next line */
+  overflow-x: auto;    /* Allows scrolling on mobile if too wide */
+  padding: 10px 0;
+}
+
+/* Ensure the individual filter items don't stretch too much */
+.filter-item {
+  flex: 0 0 auto; 
+}

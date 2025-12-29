@@ -1,0 +1,254 @@
+/* Container & Heading */
+.cart-container {
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Inter', sans-serif;
+}
+
+.cart-heading {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #111;
+}
+
+/* Grid Layout */
+.cart-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+/* Cart Items */
+.cart-items {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cart-item {
+  display: flex;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  background: #fff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.cart-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.cart-item-image img {
+  width: 110px;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 0.5rem;
+}
+
+/* Item Details */
+.cart-item-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.cart-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-item-name {
+  font-weight: 600;
+  font-size: 1.1rem;
+  color: #111;
+  text-decoration: none;
+}
+
+.cart-item-name:hover {
+  color: #555;
+  text-decoration: underline;
+}
+
+/* Remove Button */
+.cart-remove {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #888;
+  transition: color 0.2s ease;
+}
+
+.cart-remove:hover {
+  color: #e53e3e; /* Red on hover */
+}
+
+/* Item Info */
+.cart-item-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #555;
+  margin-top: 0.5rem;
+}
+
+.cart-item-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+/* Quantity Selector */
+.cart-quantity {
+  display: flex;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.cart-quantity button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: #f3f3f3;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.cart-quantity button:hover {
+  background: #e5e5e5;
+}
+
+.cart-quantity span {
+  width: 40px;
+  text-align: center;
+  font-weight: 500;
+}
+
+/* Price */
+.cart-price {
+  font-weight: 600;
+  color: #111;
+  font-size: 1rem;
+}
+
+/* Cart Summary */
+.cart-summary {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.cart-summary h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: #111;
+  text-transform: uppercase;
+}
+
+.cart-summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cart-summary-row {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+.cart-summary-total {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.25rem;
+  margin: 1rem 0;
+}
+
+/* Checkout Button */
+.cart-checkout-btn {
+  width: 100%;
+  background: #111;
+  color: #fff;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  padding: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.cart-checkout-btn:hover {
+  background: #e53e3e;
+  transform: translateY(-2px);
+}
+
+/* Note */
+.cart-summary-note {
+  text-align: center;
+  font-size: 0.85rem;
+  color: #666;
+  margin-top: 0.5rem;
+}
+
+/* Empty Cart */
+.cart-empty {
+  text-align: center;
+  padding: 6rem 1rem;
+}
+
+.cart-empty-icon {
+  height: 64px;
+  width: 64px;
+  margin: 0 auto 1rem;
+  color: #888;
+}
+
+.cart-empty-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.cart-empty-text {
+  color: #666;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+.cart-item-variant {
+  font-size: 0.85rem;
+  letter-spacing: 0.02em;
+  color: #666;
+}
+
+.cart-item-date {
+  font-family: 'Inter', sans-serif;
+  opacity: 0.7;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.cart-item-details {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}

@@ -1,0 +1,172 @@
+@import url('@fontsource/playfair-display/400.css');
+@import url('@fontsource/playfair-display/500.css');
+@import url('@fontsource/playfair-display/600.css');
+@import url('@fontsource/playfair-display/700.css');
+@import url('@fontsource/dm-sans/400.css');
+@import url('@fontsource/dm-sans/500.css');
+@import url('@fontsource/dm-sans/600.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 20% 98%;
+    --foreground: 30 10% 10%;
+
+    --card: 40 20% 98%;
+    --card-foreground: 30 10% 10%;
+
+    --popover: 40 20% 98%;
+    --popover-foreground: 30 10% 10%;
+
+    --primary: 30 10% 10%;
+    --primary-foreground: 40 20% 98%;
+
+    --secondary: 35 15% 93%;
+    --secondary-foreground: 30 10% 10%;
+
+    --muted: 35 10% 90%;
+    --muted-foreground: 30 8% 45%;
+
+    --accent: 25 30% 85%;
+    --accent-foreground: 30 10% 10%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 35 15% 88%;
+    --input: 35 15% 88%;
+    --ring: 30 10% 10%;
+
+    --radius: 0.25rem;
+
+    /* Custom tokens */
+    --font-display: 'Playfair Display', serif;
+    --font-body: 'DM Sans', sans-serif;
+    
+    --warm-beige: 35 40% 90%;
+    --warm-taupe: 30 15% 75%;
+    --charcoal: 30 10% 15%;
+    
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    --shadow-soft: 0 4px 20px -4px hsl(30 10% 10% / 0.08);
+    --shadow-elevated: 0 10px 40px -10px hsl(30 10% 10% / 0.12);
+  }
+
+  .dark {
+    --background: 30 10% 8%;
+    --foreground: 40 15% 95%;
+
+    --card: 30 10% 12%;
+    --card-foreground: 40 15% 95%;
+
+    --popover: 30 10% 12%;
+    --popover-foreground: 40 15% 95%;
+
+    --primary: 40 15% 95%;
+    --primary-foreground: 30 10% 8%;
+
+    --secondary: 30 10% 18%;
+    --secondary-foreground: 40 15% 95%;
+
+    --muted: 30 10% 20%;
+    --muted-foreground: 35 10% 60%;
+
+    --accent: 30 15% 25%;
+    --accent-foreground: 40 15% 95%;
+
+    --border: 30 10% 20%;
+    --input: 30 10% 20%;
+    --ring: 40 15% 95%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground font-body antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-display;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
+  .font-body {
+    font-family: var(--font-body);
+  }
+
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.3s ease-out forwards;
+  }
+
+  .hover-lift {
+    transition: var(--transition-smooth);
+  }
+
+  .hover-lift:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-elevated);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+body {
+  @apply bg-background text-foreground font-body antialiased;
+  /* Use clip instead of hidden to keep sticky working */
+  overflow-x: clip;
+}
+/* Add this to your index.css if not already there */
+img {
+  max-width: 100%;
+  height: auto;
+}
