@@ -160,7 +160,22 @@
     transform: scale(1);
   }
 }
-body {
+
+@layer base {
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100%;
+    /* Prevents the tiny white gap on the right side of the screen */
+    overflow-x: hidden; 
+  }
+
+  #root {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+  body {
   @apply bg-background text-foreground font-body antialiased;
   /* Use clip instead of hidden to keep sticky working */
   overflow-x: clip;
@@ -169,4 +184,6 @@ body {
 img {
   max-width: 100%;
   height: auto;
+  display: block;
+}
 }

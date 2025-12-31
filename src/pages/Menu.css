@@ -211,3 +211,18 @@
   visibility: visible;
   pointer-events: all;
 }
+.admin-highlight {
+  background-color: #fffbeb; /* Very light amber */
+  border-radius: 8px;
+  margin-top: 5px;
+}
+
+.admin-highlight:hover {
+  background-color: #fef3c7;
+}
+
+.admin-section-mobile {
+  border-bottom: 1px solid #f0f0f0;
+  padding-bottom: 15px;
+  margin-bottom: 15px;
+}

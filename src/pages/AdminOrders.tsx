@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import { useCart } from '@/context/CartContext';
@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { products as initialProducts } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
+import { isUserAdmin } from '@/config/admins';
 import './AdminOrders.css';
 
 const GLAMOUR_CATEGORIES = [
@@ -29,28 +30,28 @@ const AdminOrders = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   
-  /* ---------------- INVENTORY STATE ---------------- */
   const [inventory, setInventory] = useState(() => {
     const saved = localStorage.getItem('glamour_inventory');
     if (saved) return JSON.parse(saved);
-    
-    // Ensure initial static products have stock and category fields mapped correctly
     return initialProducts.map(p => ({ 
       ...p, 
       stock: p.stock ?? 10,
       category: p.category || 'all',
-      subcategory: p.subcategory || p.category // Fallback for search
+      department: p.department || 'women',
+      subcategory: p.subcategory || p.category 
     }));
   });
 
   useEffect(() => {
-    const handleStorageUpdate = () => {
-      const saved = localStorage.getItem('glamour_inventory');
-      if (saved) setInventory(JSON.parse(saved));
-    };
-    window.addEventListener('storage', handleStorageUpdate);
-    return () => window.removeEventListener('storage', handleStorageUpdate);
-  }, []);
+    if (!user || !isUserAdmin(user.email)) {
+      toast({
+        variant: "destructive",
+        title: "Access Denied",
+        description: "Admin privileges required."
+      });
+      navigate('/');
+    }
+  }, [user, navigate, toast]);
 
   useEffect(() => {
     localStorage.setItem('glamour_inventory', JSON.stringify(inventory));
@@ -65,37 +66,31 @@ const AdminOrders = () => {
     stock: '10'
   });
 
-  /* ---------------- ETHIOPIAN DATE LOGIC ---------------- */
   const toEthiopianDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const timestamp = date.getTime();
-    const gregorianYear = date.getFullYear();
-    let ethiopianYear = gregorianYear - 8;
-    const newYearSept11 = new Date(gregorianYear, 8, 11).getTime();
-    if (timestamp >= newYearSept11) ethiopianYear = gregorianYear - 7;
-    const months = ["Meskerem", "Tikimt", "Hidar", "Tahsas", "Tir", "Yekatit", "Megabit", "Miazia", "Ginbot", "Sene", "Hamle", "Nehasse", "Pagume"];
-    const startOfYear = new Date(gregorianYear, 8, 11);
-    if (timestamp < startOfYear.getTime()) startOfYear.setFullYear(gregorianYear - 1);
-    const diffDays = Math.floor((timestamp - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
-    const ethiopianMonth = months[Math.floor(diffDays / 30)] || "Meskerem";
-    const ethiopianDay = (diffDays % 30) + 1;
-    return `${ethiopianDay}, ${ethiopianMonth}, ${ethiopianYear} E.C.`;
+    try {
+      const date = new Date(dateString);
+      const timestamp = date.getTime();
+      const gregorianYear = date.getFullYear();
+      let ethiopianYear = gregorianYear - 8;
+      const newYearSept11 = new Date(gregorianYear, 8, 11).getTime();
+      if (timestamp >= newYearSept11) ethiopianYear = gregorianYear - 7;
+      const months = ["Meskerem", "Tikimt", "Hidar", "Tahsas", "Tir", "Yekatit", "Megabit", "Miazia", "Ginbot", "Sene", "Hamle", "Nehasse", "Pagume"];
+      const startOfYear = new Date(gregorianYear, 8, 11);
+      if (timestamp < startOfYear.getTime()) startOfYear.setFullYear(gregorianYear - 1);
+      const diffDays = Math.floor((timestamp - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
+      const ethiopianMonth = months[Math.floor(diffDays / 30)] || "Meskerem";
+      const ethiopianDay = (diffDays % 30) + 1;
+      return `${ethiopianDay}, ${ethiopianMonth}, ${ethiopianYear} E.C.`;
+    } catch (e) { return "Invalid Date"; }
   };
-
-  /* ---------------- AUTH PROTECTION ---------------- */
-  useEffect(() => {
-    const adminEmail = "glamourboutique377@gmail.com";
-    if (!user || user.email?.toLowerCase() !== adminEmail) navigate('/');
-  }, [user, navigate]);
 
   const totalRevenue = orders.reduce((acc, order) => acc + order.total, 0);
   const pendingOrders = orders.filter(o => o.status === 'Processing').length;
 
-  /* ---------------- HANDLERS ---------------- */
   const updatePrice = (id: string | number, newPrice: string) => {
     const priceNum = parseFloat(newPrice);
     if (isNaN(priceNum)) return;
-    setInventory(prev => prev.map(item => 
+    setInventory((prev: any[]) => prev.map(item => 
       String(item.id) === String(id) ? { ...item, price: priceNum / 150 } : item
     ));
     toast({ title: "Price Saved" });
@@ -104,7 +99,7 @@ const AdminOrders = () => {
   const updateStock = (id: string | number, newStock: string) => {
     const stockNum = parseInt(newStock);
     if (isNaN(stockNum)) return;
-    setInventory(prev => prev.map(item => 
+    setInventory((prev: any[]) => prev.map(item => 
       String(item.id) === String(id) ? { ...item, stock: stockNum } : item
     ));
     toast({ title: "Stock Updated" });
@@ -112,7 +107,7 @@ const AdminOrders = () => {
 
   const deleteProduct = (id: string | number) => {
     if (window.confirm("Are you sure you want to remove this item?")) {
-      setInventory(prev => prev.filter(p => String(p.id) !== String(id)));
+      setInventory((prev: any[]) => prev.filter(p => String(p.id) !== String(id)));
       toast({ variant: "destructive", title: "Deleted" });
     }
   };
@@ -125,9 +120,9 @@ const AdminOrders = () => {
       price: parseFloat(newProduct.price) / 150,
       image: newProduct.image,
       stock: parseInt(newProduct.stock),
-      department: newProduct.department.toLowerCase(), // Store department
-      category: newProduct.category, // Store specific type (e.g. Tshirts)
-      subcategory: newProduct.category, // Map for shop's search logic
+      department: newProduct.department.toLowerCase(),
+      category: newProduct.category,
+      subcategory: newProduct.category,
       status: 'active'
     };
     setInventory([productToAdd, ...inventory]);
@@ -136,21 +131,17 @@ const AdminOrders = () => {
     toast({ title: "Product Added" });
   };
 
-  /* ---------------- FILTERING ---------------- */
-  const filteredOrders = orders.filter(order => 
+  const filteredOrders = useMemo(() => orders.filter(order => 
     order.id.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ), [orders, searchTerm]);
 
-  const filteredProducts = inventory.filter(p => {
+  const filteredProducts = useMemo(() => inventory.filter((p: any) => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
     const activeFilter = categoryFilter.toLowerCase();
-    
-    // In Admin, we filter by the Top Level Department (Women/Men/Kids)
     const productDept = (p.department || p.category || "").toLowerCase(); 
     const matchesCategory = activeFilter === 'all' || productDept === activeFilter;
-    
     return matchesSearch && matchesCategory;
-  });
+  }), [inventory, searchTerm, categoryFilter]);
 
   return (
     <Layout>
@@ -255,7 +246,7 @@ const AdminOrders = () => {
                         {order.items.slice(0, 2).map((item: any, i: number) => (
                           <img key={i} src={item.product?.image || item.image} alt="" className="mini-thumb" />
                         ))}
-                        {order.items.length > 2 && <span className="text-[10px] ml-1 text-gray-400">+{order.items.length - 2}</span>}
+                        {order.items.length > 2 && <span className="more-items">+{order.items.length - 2}</span>}
                       </div>
                     </td>
                     <td className="order-total">{order.total.toLocaleString()} ETB</td>
@@ -287,17 +278,17 @@ const AdminOrders = () => {
                 </tr>
               </thead>
               <tbody>
-                {filteredProducts.map((p) => {
+                {filteredProducts.map((p: any) => {
                   const isLowStock = Number(p.stock) <= 1;
                   return (
-                    <tr key={p.id} className={isLowStock ? "bg-red-50/70" : ""}>
+                    <tr key={p.id} className={isLowStock ? "low-stock-row" : ""}>
                       <td>
-                        <div className="flex items-center gap-6">
+                        <div className="product-cell-flex">
                           <img src={p.image} alt="" className="mini-thumb" />
                           <div>
                             <span className="font-medium block">{p.name}</span>
                             {isLowStock && (
-                              <span className="flex items-center gap-1 text-[10px] font-bold text-red-600 uppercase mt-1">
+                              <span className="low-stock-badge">
                                 <AlertTriangle size={10} /> {p.stock === 0 ? "Out of Stock" : "Low Stock"}
                               </span>
                             )}
@@ -319,7 +310,7 @@ const AdminOrders = () => {
                       <td>
                         <input 
                           type="number" 
-                          className={`stock-input ${isLowStock ? "border-red-500 text-red-600 font-bold bg-red-50" : ""}`} 
+                          className={`stock-input ${isLowStock ? "low-stock-alert" : ""}`} 
                           defaultValue={p.stock} 
                           onBlur={(e) => updateStock(p.id, e.target.value)}
                         />
@@ -373,16 +364,15 @@ const AdminOrders = () => {
             <div className="modal-content boutique-modal">
               <div className="modal-header mb-6">
                 <h2 className="text-2xl font-bold">New Boutique Item</h2>
-                <button onClick={() => setIsModalOpen(false)}><X /></button>
+                <button className="close-circle" onClick={() => setIsModalOpen(false)}><X /></button>
               </div>
               <form onSubmit={handleAddProduct} className="modal-form">
                 <div className="form-group mb-4">
                   <label className="text-xs font-bold uppercase text-gray-400 mb-1 block">Product Name</label>
                   <input required type="text" className="luxury-input" value={newProduct.name} onChange={(e) => setNewProduct({...newProduct, name: e.target.value})} />
                 </div>
-
-                <div className="form-row flex gap-4 mb-4">
-                  <div className="form-group flex-1">
+                <div className="form-row">
+                  <div className="form-group">
                     <label className="text-xs font-bold uppercase text-gray-400 mb-1 block">Department</label>
                     <select className="luxury-input" value={newProduct.department} onChange={(e) => setNewProduct({...newProduct, department: e.target.value})}>
                       <option value="women">Women</option>
@@ -390,33 +380,29 @@ const AdminOrders = () => {
                       <option value="kids">Kids</option>
                     </select>
                   </div>
-                  <div className="form-group flex-1">
+                  <div className="form-group">
                     <label className="text-xs font-bold uppercase text-gray-400 mb-1 block">Category Type</label>
                     <select className="luxury-input" value={newProduct.category} onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}>
                       {GLAMOUR_CATEGORIES.map(c => <option key={c} value={c}>{c.replace('_', ' & ')}</option>)}
                     </select>
                   </div>
                 </div>
-
-                <div className="form-row flex gap-4 mb-4">
-                  <div className="form-group flex-1">
+                <div className="form-row">
+                  <div className="form-group">
                     <label className="text-xs font-bold uppercase text-gray-400 mb-1 block">Price (ETB)</label>
                     <input required type="number" className="luxury-input" value={newProduct.price} onChange={(e) => setNewProduct({...newProduct, price: e.target.value})} />
                   </div>
-                  <div className="form-group flex-1">
+                  <div className="form-group">
                     <label className="text-xs font-bold uppercase text-gray-400 mb-1 block">Stock</label>
                     <input required type="number" className="luxury-input" value={newProduct.stock} onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})} />
                   </div>
                 </div>
-
                 <div className="form-group mb-6">
                   <label className="text-xs font-bold uppercase text-gray-400 mb-1 block">Image Address (URL)</label>
                   <div className="relative">
-                    <input required type="text" className="luxury-input pl-10" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} />
-                    <Camera className="absolute left-3 top-3 text-gray-400" size={18} />
+                    <input required type="text" className="luxury-input" value={newProduct.image} onChange={(e) => setNewProduct({...newProduct, image: e.target.value})} />
                   </div>
                 </div>
-
                 <Button type="submit" className="w-full bg-black text-white py-4 rounded-xl font-bold hover:bg-gray-900">
                   Publish to GLAMOUR
                 </Button>

@@ -1,9 +1,10 @@
 import React from 'react';
 import './Menu.css';
-import { X, Settings, ClipboardList, LogOut, LogIn } from 'lucide-react';
+import { X, Settings, ClipboardList, LogOut, LogIn, LayoutDashboard } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { useCart } from '@/context/CartContext';
+import { isUserAdmin } from '@/config/admins';
 
 interface MenuProps {
   isOpen: boolean;
@@ -15,9 +16,11 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const { orders } = useCart();
 
-  /* ---------------- THE FIX: FILTERED ORDER COUNT ---------------- */
-  // This ensures User A doesn't see User B's order count.
-  // We only count orders where the customerEmail matches the logged-in user's email.
+  // Determine if the logged-in user has admin privileges
+  const isAdmin = user ? isUserAdmin(user.email) : false;
+
+  /* ---------------- FILTERED ORDER COUNT ---------------- */
+  // Only count orders belonging to the logged-in user
   const orderCount = user 
     ? orders.filter((order: any) => order.customerEmail === user.email).length 
     : 0;
@@ -72,6 +75,20 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
+              {/* ADMIN SECTION (Only visible to Admins) */}
+              {isAdmin && (
+                <div className="menu-section admin-section-mobile">
+                  <p className="section-label text-amber-600">Management</p>
+                  <button 
+                    className="menu-item admin-highlight" 
+                    onClick={() => handleNavigate('/admin/orders')}
+                  >
+                    <LayoutDashboard size={20} className="menu-icon" />
+                    <span className="font-bold">Admin Dashboard</span>
+                  </button>
+                </div>
+              )}
+
               {/* Logged In: Navigation Links */}
               <div className="menu-section">
                 <p className="section-label">Account</p>
@@ -85,7 +102,6 @@ const Menu: React.FC<MenuProps> = ({ isOpen, onClose }) => {
                     <span>My Orders</span>
                   </div>
                   
-                  {/* Filtered Badge */}
                   {orderCount > 0 && (
                     <span className="order-badge bg-black text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
                       {orderCount}

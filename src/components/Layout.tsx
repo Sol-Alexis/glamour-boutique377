@@ -1,19 +1,23 @@
 import { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import { isUserAdmin } from '@/config/admins';
+import { useAuth } from '@/context/AuthContext';
 
 interface LayoutProps {
-  children: ReactNode;
+  children: ReactNode;
 }
 
 const Layout = ({ children }: LayoutProps) => {
+    const { user } = useAuth();
+  
+  // Single source of truth for admin status
+  const isAdmin = isUserAdmin(user?.email);
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      {/* 1. Added 'pt-20' (padding-top) to push content below the fixed header.
-        2. Added 'w-full overflow-x-hidden' to prevent horizontal scroll issues during resize.
-      */}
-      <main className="flex-1 pt-20 w-full overflow-x-hidden">
+    <div className="min-h-screen flex flex-col m-0 p-0"> {/* Ensure zeroed out */}
+      <Header isAdmin={isAdmin} />
+      {/* Removed pt-20 and overflow-x-hidden from here */}
+      <main className="flex-1 w-full"> 
         {children}
       </main>
       <Footer />

@@ -72,21 +72,20 @@
   transform: translateY(-2px);
 }
 
-/* THE DROPDOWN - Modern Rounded Menu */
 .filter-dropdown-menu {
   position: absolute;
-  top: calc(100% + 12px); /* Positioned below with a small air gap */
+  top: calc(100% + 12px); 
   left: 0;
   width: 100%;
-  background: white;
-  border: 1px solid #eee;
-  border-radius: 20px;   /* Rounded corners for the menu itself */
+  background-color: #ffffff; /* !important ensures Tailwind doesn't make it transparent */
+  border: 1px solid #e5e5e5;
+  border-radius: 20px;
   padding: 12px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr; 
   gap: 8px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-  z-index: 100;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15); 
+  z-index: 9999; /* Higher z-index to stay on top of the product images */
   animation: slideDown 0.3s ease-out;
 }
 
@@ -95,14 +94,18 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Option Buttons inside the menu */
 .opt-btn {
+  width: 100%;            /* Ensures all color buttons are the same size */
   height: 42px;
   border: 1px solid #f0f0f0;
   background: white;
+  color: #000000;
   font-size: 11px;
   font-weight: 700;
-  border-radius: 12px;   /* Rounded options */
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.2s;
   cursor: pointer;
 }

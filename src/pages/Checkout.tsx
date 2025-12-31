@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCart } from '@/context/CartContext';
+import { useAuth } from '@/context/AuthContext'; // <--- ADD THIS
 import { useToast } from '@/hooks/use-toast';
 import './Checkout.css';
 
@@ -14,6 +15,7 @@ import TelebirrLogo from '../assets/telebirr.png';
 
 const Checkout = () => {
   const { items, clearCart, addOrder } = useCart();
+  const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { toast } = useToast();
@@ -24,7 +26,7 @@ const Checkout = () => {
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: user?.email || '',
+    email: '',
     phone: '',
     address: '',
     city: '',
@@ -41,9 +43,11 @@ const Checkout = () => {
   };
 
   const subtotalETB = checkoutItems.reduce((acc, item) => {
-    const price = item.product?.price || item.price || 0;
-    return acc + (price * 150 * item.quantity);
-  }, 0);
+  // Check both 'item.product.price' (Buy Now) and 'item.price' (Cart)
+  const price = item.product?.price || item.price || 0;
+  const quantity = item.quantity || 1;
+  return acc + (price * 150 * quantity);
+}, 0);
 
   const shippingCost = subtotalETB >= 10000 ? 0 : 200;
   const finalTotal = subtotalETB + shippingCost;
