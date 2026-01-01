@@ -8,8 +8,8 @@ interface ProductCardProps {
 
 export const ProductCard = ({ product }: ProductCardProps) => {
   const { addToCart } = useCart();
-  const [selectedSize, setSelectedSize] = useState<string>('M');
-  const [selectedColor, setSelectedColor] = useState<string>('Black');
+  const [selectedSize, setSelectedSize] = useState<string>('original');
+  const [selectedColor, setSelectedColor] = useState<string>('standard');
 
   const handleBuyNow = () => {
     alert(`Preview: ${product.name}\nSize: ${selectedSize}\nColor: ${selectedColor}`);

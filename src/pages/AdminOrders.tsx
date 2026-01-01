@@ -91,7 +91,7 @@ const AdminOrders = () => {
     const priceNum = parseFloat(newPrice);
     if (isNaN(priceNum)) return;
     setInventory((prev: any[]) => prev.map(item => 
-      String(item.id) === String(id) ? { ...item, price: priceNum / 150 } : item
+      String(item.id) === String(id) ? { ...item, price: priceNum } : item
     ));
     toast({ title: "Price Saved" });
   };
@@ -117,7 +117,7 @@ const AdminOrders = () => {
     const productToAdd = {
       id: Date.now(),
       name: newProduct.name,
-      price: parseFloat(newProduct.price) / 150,
+      price: parseFloat(newProduct.price),
       image: newProduct.image,
       stock: parseInt(newProduct.stock),
       department: newProduct.department.toLowerCase(),
@@ -163,7 +163,7 @@ const AdminOrders = () => {
 
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon rev"><DollarSign size={20} /></div>
+            <div className="stat-icon rev">ETB</div>
             <div>
               <p className="stat-label">Total Revenue</p>
               <h3 className="stat-value">{totalRevenue.toLocaleString()} ETB</h3>
@@ -300,7 +300,7 @@ const AdminOrders = () => {
                         <div className="edit-price-wrapper">
                           <input 
                             type="number" 
-                            defaultValue={(p.price * 150).toFixed(0)}
+                            defaultValue={(p.price).toFixed(0)}
                             onBlur={(e) => updatePrice(p.id, e.target.value)}
                             className="price-input"
                           />
@@ -345,7 +345,7 @@ const AdminOrders = () => {
                         <img src={item.product?.image || item.image} alt="" className="w-8 h-8 rounded object-cover" />
                         <span>{item.product?.name || item.name} x{item.quantity}</span>
                       </div>
-                      <span className="font-medium">{(item.product?.price ? item.product.price * 150 : item.price * 150).toLocaleString()} ETB</span>
+                      <span className="font-medium">{(item.product?.price ? item.product.price : item.price * 150).toLocaleString()} ETB</span>
                     </div>
                   ))}
                 </div>

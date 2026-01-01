@@ -152,8 +152,7 @@ const Cart = () => {
                       </div>
 
                       <p className="cart-price">
-                        {(item.product.price * 150 * item.quantity).toLocaleString()} ETB
-                      </p>
+  {(item.product.price * item.quantity).toLocaleString()} ETB</p>
                     </div>
                   </div>
                 </div>
@@ -166,19 +165,21 @@ const Cart = () => {
             <div className="cart-summary-details">
               <div className="cart-summary-row">
                 <span>Subtotal: </span>
-                <span>{(totalPrice * 150).toLocaleString()} ETB</span>
+                <span>{totalPrice.toLocaleString()} ETB</span>
               </div>
               <div className="cart-summary-row">
                 <span>Shipping: </span>
-                <span>{totalPrice * 150 >= 15000 ? 'Free' : '200 ETB'}</span>
+                <span>{totalPrice >= 15000 ? 'Free' : '200 ETB'}</span>
               </div>
             </div>
 
             <div className="cart-summary-total">
               <span>Total: </span>
-              <span>
-                {(totalPrice * 150 >= 15000 ? totalPrice * 150 : totalPrice * 150 + 200).toLocaleString()} ETB
-              </span>
+             <span>
+  {(totalPrice >= 15000 
+    ? totalPrice 
+    : totalPrice + 200).toLocaleString()} ETB
+</span>
             </div>
 
             <Button

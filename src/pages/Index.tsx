@@ -28,6 +28,7 @@ const Index = ({ department = 'all' }: IndexProps) => {
   const [selectedColor, setSelectedColor] = useState('');
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+const [limitMessage, setLimitMessage] = useState<string | null>(null);
 
   const categoriesRef = useRef<HTMLDivElement | null>(null);
   const filtersRef = useRef<HTMLDivElement | null>(null);
@@ -253,8 +254,8 @@ const handleBuyNow = () => {
     // Use addToCart with the 4 arguments your CartContext expects
     addToCart(
       selectedProduct, 
-      selectedSize || "M", 
-      selectedColor || "Default", 
+      selectedSize || "original", 
+      selectedColor || "standard", 
       1
     );
 
@@ -278,9 +279,9 @@ const handleBuyNow = () => {
     const availableStock = selectedProduct.stock ?? 10;
 
     if (currentQty >= availableStock) {
-      alert(`Limit reached! You already have ${currentQty} units of this item in your cart.`);
-      return;
-    }
+  setLimitMessage(`Limit reached! You already have ${currentQty} units of this item in your cart.`);
+  return;
+}
 
     addToCart(selectedProduct, targetSize, targetColor, 1);
     setSelectedProduct(null);
@@ -378,8 +379,8 @@ const handleBuyNow = () => {
             </div>
             <h3 className="text-sm font-medium mt-2">{product.name}</h3>
             <p className="text-sm text-muted-foreground">
-              {(product.price * 150).toLocaleString()} ETB
-            </p>
+  {product.price.toLocaleString()} ETB
+</p>
           </div>
         ))
       }
@@ -409,8 +410,7 @@ const handleBuyNow = () => {
             <div className="text-center">
               <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{(selectedProduct.category || '').replace('_', ' & ')}</span>
               <h2 className="text-4xl font-serif mt-2 mb-2">{selectedProduct.name}</h2>
-              <p className="text-2xl font-light">{(selectedProduct.price * 150).toLocaleString()} ETB</p>
-              
+              <p className="text-2xl font-light"> {selectedProduct.price.toLocaleString()} ETB </p>
               <div className="mt-2 h-6">
                 {(selectedProduct.stock ?? 10) <= 0 ? (
                   <span className="text-red-500 font-bold text-xs uppercase tracking-widest">Out of Stock</span>
@@ -489,13 +489,20 @@ const handleBuyNow = () => {
   </button>
 
   {/* Add to Cart */}
-  <button 
-    className="action-btn-outline-black disabled:opacity-50 disabled:cursor-not-allowed" 
+<div className="flex flex-col gap-2 mt-2">
+  <button
+    className="action-btn-outline-black disabled:opacity-50 disabled:cursor-not-allowed"
     onClick={handleAddToCart}
     disabled={(selectedProduct.stock ?? 10) <= 0}
   >
     {(selectedProduct.stock ?? 10) <= 0 ? 'Unavailable' : 'Add to Cart'}
   </button>
+
+  {/* Inline message */}
+  {limitMessage && (
+    <p className="text-red-500 text-xs font-medium">{limitMessage}</p>
+  )}
+</div>
 </div>
           </div>
         </section>

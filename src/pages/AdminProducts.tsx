@@ -19,7 +19,7 @@ const AdminProducts = () => {
     if (isNaN(priceNum)) return;
 
     setInventory(prev => prev.map(item => 
-      item.id === id ? { ...item, price: priceNum / 150 } : item // Assuming 150 is your ETB rate
+      item.id === id ? { ...item, price: priceNum } : item
     ));
   };
 
@@ -56,7 +56,7 @@ const AdminProducts = () => {
                 <td className="p-4">
                   <input 
                     type="number" 
-                    defaultValue={(product.price * 150).toFixed(0)} 
+                    defaultValue={(product.price).toFixed(0)} 
                     onBlur={(e) => handlePriceChange(product.id, e.target.value)}
                     className="w-24 border border-gray-200 rounded px-2 py-1 text-sm focus:ring-1 focus:ring-black outline-none"
                   />

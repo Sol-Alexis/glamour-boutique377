@@ -37,8 +37,8 @@ const ProductDetails = () => {
     return allProducts.find(p => String(p.id) === String(productId));
   }, [allProducts, productId]);
 
-  const [selectedColor, setSelectedColor] = useState<string>('default');
-  const [selectedSize, setSelectedSize] = useState<string>('M');
+  const [selectedColor, setSelectedColor] = useState<string>('standard');
+  const [selectedSize, setSelectedSize] = useState<string>('original');
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -114,8 +114,8 @@ const handleAddToCart = () => {
             </h1>
             
             <p className="text-3xl font-medium mb-8 text-zinc-900">
-              {(currentProduct.price * 150).toLocaleString()} <span className="text-sm font-bold">ETB</span>
-            </p>
+  {currentProduct.price.toLocaleString()} <span className="text-sm font-bold">ETB</span>
+</p>
 
             <div className="space-y-8">
               {/* Color Selection */}
@@ -177,7 +177,7 @@ const handleAddToCart = () => {
 
             <div className="mt-12 pt-8 border-t border-gray-100">
               <p className="text-[11px] text-gray-400 uppercase tracking-widest leading-relaxed">
-                Free Express Delivery in Addis Ababa <br />
+                Free Express Delivery in Mekelle <br />
                 Secure Checkout Powered by Glamour
               </p>
             </div>

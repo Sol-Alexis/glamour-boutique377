@@ -46,10 +46,10 @@ const Checkout = () => {
   // Check both 'item.product.price' (Buy Now) and 'item.price' (Cart)
   const price = item.product?.price || item.price || 0;
   const quantity = item.quantity || 1;
-  return acc + (price * 150 * quantity);
+  return acc + (price * quantity);
 }, 0);
 
-  const shippingCost = subtotalETB >= 10000 ? 0 : 200;
+  const shippingCost = subtotalETB >= 15000 ? 0 : 200;
   const finalTotal = subtotalETB + shippingCost;
 
   // Check if contact and address info is filled
@@ -246,7 +246,7 @@ const Checkout = () => {
                         <p className="text-gray-500">{item.size} / {item.color}</p>
                       </div>
                       <p className="text-sm font-bold">
-                        {((item.product?.price || item.price || 0) * 150 * item.quantity).toLocaleString()} ETB
+                        {((item.product?.price || item.price || 0) * item.quantity).toLocaleString()} ETB
                       </p>
                     </div>
                   ))}
