@@ -85,7 +85,7 @@ const Settings = () => {
             <div className="setting-row">
               <div className="flex items-center gap-3">
                 {isDarkMode ? <Moon size={16}/> : <Sun size={16}/>}
-                <span>Dark Aesthetic</span>
+                <span>Dark Mode</span>
               </div>
               <button className={`switch ${isDarkMode ? 'active' : ''}`} onClick={toggleDarkMode}>
                 <div className="handle" />
@@ -142,7 +142,7 @@ const Settings = () => {
               </div>
 
               <button className="submit-password-btn group" onClick={() => showStatus("Security Updated")}>
-                <span>Update Security</span>
+                <span>Change Password</span>
                 <ArrowRight size={16} className="transition-transform group-hover:translate-x-2" />
               </button>
             </div>

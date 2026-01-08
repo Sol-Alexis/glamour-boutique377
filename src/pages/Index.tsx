@@ -251,21 +251,22 @@ const handleBuyNow = () => {
       return;
     }
 
-    // Use addToCart with the 4 arguments your CartContext expects
-    addToCart(
-      selectedProduct, 
-      selectedSize || "original", 
-      selectedColor || "standard", 
-      1
-    );
-
-    navigate('/checkout');
+    navigate('/checkout', { 
+    state: { 
+      directPurchase: {
+        product: selectedProduct,
+        size: selectedSize || "Standard",
+        color: selectedColor || "Original",
+        quantity: 1
+      }
+    } 
+  });
+      
     window.scrollTo(0, 0);
   };
 
   const handleAddToCart = () => {
     if (!selectedProduct) return;
-
     const targetSize = selectedSize || "Standard";
     const targetColor = selectedColor || "Original";
 
@@ -406,21 +407,21 @@ const handleBuyNow = () => {
               />
             </div>
 
-            {/* INFO */}
-            <div className="text-center">
-              <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{(selectedProduct.category || '').replace('_', ' & ')}</span>
-              <h2 className="text-4xl font-serif mt-2 mb-2">{selectedProduct.name}</h2>
-              <p className="text-2xl font-light"> {selectedProduct.price.toLocaleString()} ETB </p>
-              <div className="mt-2 h-6">
-                {(selectedProduct.stock ?? 10) <= 0 ? (
-                  <span className="text-red-500 font-bold text-xs uppercase tracking-widest">Out of Stock</span>
-                ) : (selectedProduct.stock ?? 10) <= 5 ? (
-                  <span className="text-orange-500 font-medium text-xs">Only {selectedProduct.stock} units left!</span>
-                ) : (
-                  <span className="text-green-600 font-medium text-xs uppercase tracking-widest">In Stock</span>
-                )}
-              </div>
-            </div>
+{/* INFO */}
+<div className="text-center">
+<span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{(selectedProduct.category || '').replace('_', ' & ')}</span>
+<h2 className="text-4xl font-serif mt-2 mb-2">{selectedProduct.name}</h2>
+<p className="text-2xl font-light"> {selectedProduct.price.toLocaleString()} ETB </p>
+<div className="mt-2 h-6">
+{(selectedProduct.stock ?? 10) <= 0 ? (
+<span className="text-red-500 font-bold text-xs uppercase tracking-widest">Out of Stock</span>
+) : (selectedProduct.stock ?? 10) <= 5 ? (
+<span className="text-orange-500 font-medium text-xs">Only {selectedProduct.stock} units left!</span>
+) : (
+<span className="text-green-600 font-medium text-xs uppercase tracking-widest">In Stock</span>
+)}
+</div>
+</div>
         {/* ACTION ROW */}
 <div className="modern-action-row">
   {/* Size Dropdown */}
@@ -479,36 +480,40 @@ const handleBuyNow = () => {
     )}
   </div>
 
-  {/* Buy Now */}
-  <button 
-    className="action-btn-black disabled:opacity-50 disabled:cursor-not-allowed" 
-    onClick={handleBuyNow}
-    disabled={(selectedProduct.stock ?? 10) <= 0}
-  >
-    {(selectedProduct.stock ?? 10) <= 0 ? 'Sold Out' : 'Buy Now'}
-  </button>
+ {/* Buy Now - Wrapped in action-item to match Size/Color */}
+  <div className="action-item">
+    <button 
+      className="action-btn-black disabled:opacity-50 disabled:cursor-not-allowed" 
+      onClick={handleBuyNow}
+      disabled={(selectedProduct.stock ?? 10) <= 0}
+    >
+      {(selectedProduct.stock ?? 10) <= 0 ? 'Sold Out' : 'Buy Now'}
+    </button>
+  </div>
 
-  {/* Add to Cart */}
-<div className="flex flex-col gap-2 mt-2">
-  <button
-    className="action-btn-outline-black disabled:opacity-50 disabled:cursor-not-allowed"
-    onClick={handleAddToCart}
-    disabled={(selectedProduct.stock ?? 10) <= 0}
-  >
-    {(selectedProduct.stock ?? 10) <= 0 ? 'Unavailable' : 'Add to Cart'}
-  </button>
+  {/* Add to Cart - Wrapper changed to action-item for equal size */}
+  <div className="action-item">
+    <button
+      className="action-btn-outline-black disabled:opacity-50 disabled:cursor-not-allowed"
+      onClick={handleAddToCart}
+      disabled={(selectedProduct.stock ?? 10) <= 0}
+    >
+      {(selectedProduct.stock ?? 10) <= 0 ? 'Unavailable' : 'Add to Cart'}
+    </button>
+  </div>
+</div>
 
-  {/* Inline message */}
-  {limitMessage && (
-    <p className="text-red-500 text-xs font-medium">{limitMessage}</p>
-  )}
-</div>
-</div>
-          </div>
-        </section>
-      )}
-    </Layout>
-  );
+{/* Move the limit message BELOW the row so it doesn't break the layout */}
+{limitMessage && (
+  <p className="text-red-500 text-center text-xs font-medium mt-4 animate-in fade-in">
+    {limitMessage}
+  </p>
+)}
+ </div>
+ </section>
+)}
+</Layout>
+ );
 };
 
 export default Index;

@@ -13,6 +13,7 @@ import { products as staticProducts, Product } from '@/data/products';
 import Menu from '@/pages/Menu'; 
 import { useAuth } from '@/context/AuthContext';
 import { isUserAdmin } from '@/config/admins';
+import { ThemeToggle } from "./ThemeToggle";
 
 interface HeaderProps {
   isAdmin?: boolean;
@@ -181,6 +182,7 @@ const Header = ({ isAdmin: isAdminProp }: HeaderProps) => {
           </div>
 
           <div className="header-icons">
+            <ThemeToggle />
             {user ? (
               <div className="header-avatar-circle" onClick={() => setMenuOpen(true)}>
                 {getInitials(user.name)}

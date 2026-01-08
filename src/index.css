@@ -187,3 +187,10 @@ img {
   display: block;
 }
 }
+@layer base {
+  body {
+    /* Adding transition makes the dark mode switch feel premium */
+    @apply bg-background text-foreground font-body antialiased transition-colors duration-500;
+    min-height: 100vh;
+  }
+}
