@@ -35,6 +35,7 @@ const Orders = () => {
 
   return (
     <Layout>
+      <div className="orders-page-wrapper">
       <div className="orders-container">
         <h1 className="orders-title">My Orders</h1>
         
@@ -84,6 +85,7 @@ const Orders = () => {
             ))
           )}
         </div>
+      </div>
       </div>
     </Layout>
   );

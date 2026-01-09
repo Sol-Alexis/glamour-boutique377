@@ -1,13 +1,28 @@
+.orders-page-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  display: flex;
+  flex-direction: column;
+}
+
 .orders-container {
   max-width: 800px;
-  margin: 4rem auto;
-  padding: 0 1rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 100px 20px 40px 20px;
+  /* This allows the container to grow and use flex for the empty state */
+  display: flex;
+  flex-direction: column;
+  flex: 1; 
 }
 
 .orders-title {
-  font-size: 2rem;
-  font-weight: bold;
+  font-size: 2.5rem;
+  font-weight: 800;
   margin-bottom: 2rem;
+  text-align: center;
 }
 
 .orders-list {
@@ -28,8 +43,8 @@
 }
 
 .order-card:hover {
+border-color: hsl(var(--primary));
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 .order-icon {
@@ -82,12 +97,19 @@
   gap: 12px;
   font-weight: 700;
 }
-
 .orders-empty {
-  text-align: center;
-  margin-top: 10rem;
+  flex: 1; /* Takes up the rest of the height */
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
+  justify-content: center; /* Centers vertically in the available space */
+  gap: 1.5rem;
+  padding-bottom: 10vh; /* Adjusts the center slightly upward for better visuals */
+}
+
+.orders-empty-icon {
+  width: 80px;
+  height: 80px;
+  opacity: 0.8;
+  color: hsl(var(--muted-foreground));
 }

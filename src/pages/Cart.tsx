@@ -48,8 +48,8 @@ const Cart = () => {
 
   return (
     <Layout>
-      <div className="cart-container">
-        <h1 className="cart-heading">Shopping Cart</h1>
+      <div className="cart-container bg-background text-foreground transition-colors duration-500">
+        <h1 className="cart-heading border-b border-border pb-4">Shopping Cart</h1>
 
         <div className="cart-grid">
           <div className="cart-items">
@@ -65,8 +65,8 @@ const Cart = () => {
                   
                   {/* ⭐ LOCAL REMOVAL FEEDBACK OVERLAY */}
                   {isActuallyRemoved && (
-                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/90 backdrop-blur-sm animate-in fade-in zoom-in duration-300">
-                      <p className="text-red-500 font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2">
+                    <div className="absolute inset-0 z-20 flex items-center justify-center bg-background/90 backdrop-blur-sm animate-in fade-in zoom-in duration-300">
+                      <p className="text-destructive font-bold text-xs uppercase tracking-[0.2em] flex items-center gap-2">
                         <X className="h-4 w-4" /> Item Removed
                       </p>
                     </div>
@@ -112,8 +112,8 @@ const Cart = () => {
 
                     <div className="cart-item-info">
                       <span className="cart-item-variant">
-                        Size: <span className="font-semibold text-black">{item.size}</span> | 
-                        Color: <span className="font-semibold text-black">{item.color}</span>
+                        Size: <span className="font-semibold text-foreground">{item.size}</span> | 
+                        Color: <span className="font-semibold text-foreground">{item.color}</span>
                       </span>
                       <span className="cart-item-date text-[10px] text-gray-400 block mt-1">
                         Added: {item.addedAt ? toEthiopianDate(new Date(item.addedAt)).fullDate : "Just now"}
@@ -159,38 +159,45 @@ const Cart = () => {
               );
             })}
           </div>
-
-          <div className="cart-summary">
-            <h2>Order Summary</h2>
+          {/* 2. Updated Summary to use bg-card and border-border */}
+          <div className="cart-summary bg-card border border-border shadow-md transition-colors duration-500">
+            <h2 className="text-foreground">Order Summary</h2>
             <div className="cart-summary-details">
-              <div className="cart-summary-row">
+              <div className="cart-summary-row text-muted-foreground">
                 <span>Subtotal: </span>
-                <span>{totalPrice.toLocaleString()} ETB</span>
+                <span className="text-foreground">{totalPrice.toLocaleString()} ETB</span>
               </div>
-              <div className="cart-summary-row">
+              <div className="cart-summary-row text-muted-foreground">
                 <span>Shipping: </span>
-                <span>{totalPrice >= 15000 ? 'Free' : '200 ETB'}</span>
+                <span className={totalPrice >= 15000 ? 'text-green-500 font-bold' : 'text-foreground'}>
+                  {totalPrice >= 15000 ? 'Free' : '200 ETB'}
+                </span>
               </div>
             </div>
 
-            <div className="cart-summary-total">
+            {/* 3. Updated Total with theme border */}
+            <div className="cart-summary-total border-t border-border pt-4 text-foreground">
               <span>Total: </span>
-             <span>
-  {(totalPrice >= 15000 
-    ? totalPrice 
-    : totalPrice + 200).toLocaleString()} ETB
-</span>
+              <span className="text-primary font-bold">
+                {(totalPrice >= 15000 
+                  ? totalPrice 
+                  : totalPrice + 200).toLocaleString()} ETB
+              </span>
             </div>
 
+            {/* 4. Updated Button to use theme colors */}
             <Button
               onClick={() => navigate('/checkout')}
               variant="default"
               size="lg"
-              className="cart-checkout-btn w-full mt-4"
+              className="cart-checkout-btn w-full mt-4 bg-primary text-primary-foreground hover:opacity-90 transition-all"
             >
               Checkout
             </Button>
-            <p className="cart-summary-note">Free shipping on orders over 15,000 ETB</p>
+            
+            <p className="cart-summary-note text-muted-foreground italic mt-4 text-center">
+              Free shipping on orders over 15,000 ETB
+            </p>
           </div>
         </div>
       </div>

@@ -4,6 +4,9 @@
   max-width: 1200px;
   margin: 0 auto;
   font-family: 'Inter', sans-serif;
+  color: hsl(var(--foreground));
+  background-color: transparent;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .cart-heading {
@@ -12,7 +15,7 @@
   margin-bottom: 2rem;
   text-transform: uppercase;
   letter-spacing: 1px;
-  color: #111;
+  color: hsl(var(--foreground));
 }
 
 /* Grid Layout */
@@ -34,14 +37,17 @@
   gap: 1rem;
   padding: 1rem;
   border-radius: 0.75rem;
-  background: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  /* Updated to card background and theme border */
+  background: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 4px 12px hsla(var(--foreground) / 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
 }
 
 .cart-item:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 6px 16px hsla(var(--foreground) / 0.08);
+  border-color: hsl(var(--primary));
 }
 
 .cart-item-image img {
@@ -49,6 +55,7 @@
   height: 140px;
   object-fit: cover;
   border-radius: 0.5rem;
+  background-color: hsl(var(--muted));
 }
 
 /* Item Details */
@@ -56,7 +63,8 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 0.5rem;
 }
 
 .cart-item-header {
@@ -68,12 +76,12 @@
 .cart-item-name {
   font-weight: 600;
   font-size: 1.1rem;
-  color: #111;
+  color: hsl(var(--foreground));
   text-decoration: none;
 }
 
 .cart-item-name:hover {
-  color: #555;
+  color: hsl(var(--primary));
   text-decoration: underline;
 }
 
@@ -82,12 +90,12 @@
   background: none;
   border: none;
   cursor: pointer;
-  color: #888;
+  color: hsl(var(--muted-foreground));
   transition: color 0.2s ease;
 }
 
 .cart-remove:hover {
-  color: #e53e3e; /* Red on hover */
+  color: #e53e3e; /* Keeps red for delete action */
 }
 
 /* Item Info */
@@ -95,7 +103,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.85rem;
-  color: #555;
+  color: hsl(var(--muted-foreground));
   margin-top: 0.5rem;
 }
 
@@ -110,55 +118,61 @@
 .cart-quantity {
   display: flex;
   align-items: center;
-  border: 1px solid #ddd;
+  border: 1px solid hsl(var(--border));
   border-radius: 0.5rem;
   overflow: hidden;
+  background-color: hsl(var(--background));
 }
 
 .cart-quantity button {
   width: 32px;
   height: 32px;
   border: none;
-  background: #f3f3f3;
+  background: hsl(var(--secondary));
+  color: hsl(var(--foreground));
   cursor: pointer;
   transition: background 0.2s ease;
 }
 
 .cart-quantity button:hover {
-  background: #e5e5e5;
+  background: hsl(var(--primary) / 0.2);
 }
 
 .cart-quantity span {
   width: 40px;
   text-align: center;
   font-weight: 500;
+  color: hsl(var(--foreground));
 }
 
 /* Price */
 .cart-price {
   font-weight: 600;
-  color: #111;
+  color: hsl(var(--foreground));
   font-size: 1rem;
 }
 
 /* Cart Summary */
 .cart-summary {
-  background: #fff;
+  /* Using card background with a subtle border */
+  background: hsl(var(--card));
   padding: 2rem;
   border-radius: 1rem;
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+  border: 1px solid hsl(var(--border));
+  box-shadow: 0 6px 16px hsla(var(--foreground) / 0.06);
   position: sticky;
   top: 6rem;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  transition: background 0.3s ease;
 }
 
 .cart-summary h2 {
   font-size: 1.4rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
-  color: #111;
+  color: hsl(var(--foreground));
   text-transform: uppercase;
 }
 
@@ -173,6 +187,7 @@
   justify-content: space-between;
   font-weight: 500;
   font-size: 1rem;
+  color: hsl(var(--muted-foreground));
 }
 
 .cart-summary-total {
@@ -181,23 +196,26 @@
   font-weight: 700;
   font-size: 1.25rem;
   margin: 1rem 0;
+  color: hsl(var(--foreground));
+  border-top: 1px solid hsl(var(--border));
+  padding-top: 1rem;
 }
 
 /* Checkout Button */
 .cart-checkout-btn {
   width: 100%;
-  background: #111;
-  color: #fff;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
   font-weight: 600;
   border-radius: 0.75rem;
   padding: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  transition: background 0.3s ease, transform 0.2s ease;
+  transition: opacity 0.3s ease, transform 0.2s ease;
 }
 
 .cart-checkout-btn:hover {
-  background: #e53e3e;
+  opacity: 0.9;
   transform: translateY(-2px);
 }
 
@@ -205,38 +223,70 @@
 .cart-summary-note {
   text-align: center;
   font-size: 0.85rem;
-  color: #666;
+  color: hsl(var(--muted-foreground));
   margin-top: 0.5rem;
 }
 
-/* Empty Cart */
+/* Empty Cart Wrapper */
 .cart-empty {
   text-align: center;
-  padding: 6rem 1rem;
+  /* Fixed: This ensures the background color changes with your theme */
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  
+  /* Fixed: This ensures it fills the viewport so no white gaps appear */
+  min-height: 80vh; 
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  width: 100%;
 }
 
 .cart-empty-icon {
   height: 64px;
   width: 64px;
-  margin: 0 auto 1rem;
-  color: #888;
+  margin-bottom: 1.5rem;
+  /* Use muted-foreground so it's grey in light and dim in dark */
+  color: hsl(var(--muted-foreground));
+  opacity: 0.8;
 }
 
 .cart-empty-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.02em;
+  color: hsl(var(--foreground));
 }
 
 .cart-empty-text {
-  color: #666;
-  margin-bottom: 1.5rem;
-  font-size: 1rem;
+  color: hsl(var(--muted-foreground));
+  margin-bottom: 2rem;
+  font-size: 1.1rem;
+  max-width: 400px;
+  line-height: 1.6;
 }
+
+/* Optional: Style the "Return to Shop" button if you have one */
+.cart-empty-button {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 0.8rem 2rem;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+.cart-empty-button:hover {
+  opacity: 0.9;
+}
+
 .cart-item-variant {
   font-size: 0.85rem;
   letter-spacing: 0.02em;
-  color: #666;
+  color: hsl(var(--muted-foreground));
 }
 
 .cart-item-date {
@@ -244,11 +294,15 @@
   opacity: 0.7;
   font-style: italic;
   margin-top: 4px;
+  color: hsl(var(--muted-foreground));
 }
 
-.cart-item-details {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 0.5rem;
+/* Mobile: Stack them nicely */
+@media (max-width: 850px) {
+  .cart-grid {
+    grid-template-columns: 1fr;
+  }
+  .cart-summary {
+    position: static;
+  }
 }
