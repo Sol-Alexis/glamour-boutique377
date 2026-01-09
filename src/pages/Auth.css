@@ -8,8 +8,12 @@
   min-height: 100vh;
   padding: 4rem 1rem;
   background: linear-gradient(135deg, #fdf6f0, #f0f4ff);
+  transition: background 0.3s ease;
 }
-
+/* DARK MODE: Change the background gradient */
+.dark .auth-container {
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+}
 .auth-card {
   background: #fff;
   padding: 2.5rem;
@@ -19,6 +23,12 @@
   max-width: 420px;
   transition: var(--transition-smooth);
   box-sizing: border-box; /* Prevents card overflow */
+}
+/* DARK MODE: Change card color and border */
+.dark .auth-card {
+  background: #1e293b; /* Dark Slate */
+  border: 1px solid #334155;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
 }
 
 .auth-card:hover {
@@ -34,6 +44,10 @@
   letter-spacing: 0.5px;
 }
 
+/* DARK MODE: Heading color */
+.dark .auth-heading {
+  color: #f8fafc;
+}
 /* ==========================================================================
    2. TOGGLE TABS
    ========================================================================== */
@@ -45,7 +59,9 @@
   border-bottom: 1px solid #eee;
   padding-bottom: 0.5rem;
 }
-
+.dark .auth-toggle {
+  border-color: #334155;
+}
 .auth-toggle-btn {
   flex: 1;
   padding: 0.75rem;
@@ -58,7 +74,10 @@
   transition: var(--transition-fast);
   color: #888;
 }
-
+.dark .auth-toggle-btn.active {
+  color: #d4af37; /* Luxury Gold for active tab in dark mode */
+  border-color: #d4af37;
+}
 .auth-toggle-btn.active {
   color: #000;
   border-color: #000;
@@ -80,7 +99,11 @@
   gap: 0.5rem;
   width: 100%;
 }
-
+.dark .auth-field label {
+  color: #ffffff !important;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
 /* This is the magic fix: anchors icons to the specific input field */
 .relative-container {
   position: relative;
@@ -95,6 +118,10 @@
   gap: 1rem;
   width: 100%;
 }
+.dark .auth-field label {
+  color: #ffffff; /* Keeps the labels white so they stand out against the dark background */
+  font-weight: 500;
+}
 
 .auth-input {
   width: 100%;
@@ -107,13 +134,21 @@
   background-color: #fff;
   transition: var(--transition-fast);
 }
-
+/* DARK MODE: Input styling */
+.dark .auth-input {
+  background-color: #0f172a;
+  border-color: #334155;
+  color: #f8fafc;
+}
 .auth-input:focus {
   border-color: #000;
   outline: none;
   box-shadow: 0 0 0 3px rgba(0,0,0,0.03);
 }
-
+.dark .auth-input:focus {
+  border-color: #d4af37; /* Gold focus in dark mode */
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.1);
+}
 .auth-input.pr-24 {
   padding-right: 5rem !important; /* Increased space for two icons */
 }
@@ -168,6 +203,10 @@
   transition: all 0.2s ease;
 }
 
+.dark .auth-input-arrow {
+  background: #d4af37; /* Gold arrow button for dark mode */
+  color: #000;
+}
 .auth-input-arrow:hover {
   background: #333;
   transform: translateX(2px);
@@ -201,6 +240,16 @@
   font-weight: 600;
   border-radius: 0.75rem;
   margin-top: 0.5rem;
+}
+
+.dark .auth-button {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.dark .auth-button:hover {
+  background: #d4af37; /* Gold hover for main button */
+  color: #000;
 }
 
 .error-text {
