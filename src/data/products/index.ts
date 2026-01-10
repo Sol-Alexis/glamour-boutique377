@@ -18,10 +18,10 @@ const getLiveProducts = (): Product[] => {
     // Merge static data with local stock levels to ensure all fields exist
     return staticProducts.map(staticP => {
       const liveP = localInventory.find((lp: any) => String(lp.id) === String(staticP.id));
-      return liveP ? liveP : { ...staticP, stock: staticP.stock ?? 10 };
+      return liveP ? liveP : { ...staticP, stock: staticP.stock ?? 0 };
     });
   }
-  return staticProducts.map(p => ({ ...p, stock: p.stock ?? 10 }));
+  return staticProducts.map(p => ({ ...p, stock: p.stock ?? 0 }));
 };
 
 export const products = getLiveProducts();

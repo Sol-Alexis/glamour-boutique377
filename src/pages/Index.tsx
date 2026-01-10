@@ -246,7 +246,7 @@ const Index = ({ department = "all" }: IndexProps) => {
     }
 
     // Check Stock
-    const stockLimit = selectedProduct.stock ?? 10;
+    const stockLimit = selectedProduct.stock ?? 0;
     if (stockLimit <= 0) {
       toast({
         variant: "destructive",
@@ -260,8 +260,8 @@ const Index = ({ department = "all" }: IndexProps) => {
       state: {
         directPurchase: {
           product: selectedProduct,
-          size: selectedSize || "Standard",
-          color: selectedColor || "Original",
+          size: selectedSize || "original",
+          color: selectedColor || "standard",
           quantity: 1,
         },
       },
@@ -269,32 +269,53 @@ const Index = ({ department = "all" }: IndexProps) => {
 
     window.scrollTo(0, 0);
   };
-
   const handleAddToCart = () => {
     if (!selectedProduct) return;
-    const targetSize = selectedSize || "Standard";
-    const targetColor = selectedColor || "Original";
+    const targetSize = selectedSize || "original";
+    const targetColor = selectedColor || "standard";
+
+    // --- THE FIX: GET FRESH STOCK FROM LOCAL STORAGE ---
+    const localData = localStorage.getItem("glamour_inventory");
+    const localProducts = localData ? JSON.parse(localData) : [];
+    const liveEntry = localProducts.find(
+      (p: any) => String(p.id) === String(selectedProduct.id)
+    );
+
+    // Use Admin stock if it exists, otherwise use the product's own stock
+    const availableStock = liveEntry
+      ? Number(liveEntry.stock)
+      : selectedProduct.stock ?? 0;
 
     const itemInCart = items.find(
       (item) =>
         String(item.product.id) === String(selectedProduct.id) &&
-        item.size === targetSize
+        item.size === targetSize &&
+        item.color === targetColor
     );
 
     const currentQty = itemInCart ? itemInCart.quantity : 0;
-    const availableStock = selectedProduct.stock ?? 10;
 
     if (currentQty >= availableStock) {
       setLimitMessage(
         `Limit reached! You already have ${currentQty} units of this item in your cart.`
       );
+      // Clear message after 3 seconds
+      setTimeout(() => setLimitMessage(null), 3000);
       return;
     }
 
     addToCart(selectedProduct, targetSize, targetColor, 1);
+
+    // Optional: Provide feedback instead of closing the view immediately
+    toast({
+      title: "Added to Cart",
+      description: `${selectedProduct.name} has been added.`,
+    });
+
     setSelectedProduct(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }; /* ---------------- CATEGORY LIST ---------------- */
+  };
+  /* ---------------- CATEGORY LIST ---------------- */
 
   const categories = [
     "Belts",
@@ -436,11 +457,11 @@ const Index = ({ department = "all" }: IndexProps) => {
                 {selectedProduct.price.toLocaleString()} ETB{" "}
               </p>
               <div className="mt-2 h-6">
-                {(selectedProduct.stock ?? 10) <= 0 ? (
+                {(selectedProduct.stock ?? 0) <= 0 ? (
                   <span className="text-red-500 font-bold text-xs uppercase tracking-widest">
                     Out of Stock
                   </span>
-                ) : (selectedProduct.stock ?? 10) <= 5 ? (
+                ) : (selectedProduct.stock ?? 0) <= 5 ? (
                   <span className="text-orange-500 font-medium text-xs">
                     Only {selectedProduct.stock} units left!
                   </span>
@@ -536,9 +557,9 @@ const Index = ({ department = "all" }: IndexProps) => {
                 <button
                   className="action-btn-black disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleBuyNow}
-                  disabled={(selectedProduct.stock ?? 10) <= 0}
+                  disabled={(selectedProduct.stock ?? 0) <= 0}
                 >
-                  {(selectedProduct.stock ?? 10) <= 0 ? "Sold Out" : "Buy Now"}
+                  {(selectedProduct.stock ?? 0) <= 0 ? "Sold Out" : "Buy Now"}
                 </button>
               </div>
 
@@ -547,9 +568,9 @@ const Index = ({ department = "all" }: IndexProps) => {
                 <button
                   className="action-btn-outline-black disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleAddToCart}
-                  disabled={(selectedProduct.stock ?? 10) <= 0}
+                  disabled={(selectedProduct.stock ?? 0) <= 0}
                 >
-                  {(selectedProduct.stock ?? 10) <= 0
+                  {(selectedProduct.stock ?? 0) <= 0
                     ? "Unavailable"
                     : "Add to Cart"}
                 </button>

@@ -61,7 +61,7 @@ const handleAddToCart = () => {
     if (!currentProduct) return;
     
     // Correct function: addToCart | Correct args: 4 separate values
-    addToCart(currentProduct, selectedSize || "standard", selectedColor || "original", 1);
+    addToCart(currentProduct, selectedSize || "original", selectedColor || "standard", 1);
     
     toast({
       title: "Added to Bag",
@@ -82,7 +82,7 @@ const handleAddToCart = () => {
     }
 
     // Correct function: addToCart | Correct args: 4 separate values
-    addToCart(currentProduct, selectedSize || "M", selectedColor || "Default", 1);
+    addToCart(currentProduct, selectedSize || "original", selectedColor || "standard", 1);
 
     navigate('/checkout');
     window.scrollTo(0, 0);

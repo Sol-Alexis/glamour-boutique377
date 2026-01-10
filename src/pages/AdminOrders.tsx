@@ -55,7 +55,7 @@ const AdminOrders = () => {
     if (saved) return JSON.parse(saved);
     return initialProducts.map((p) => ({
       ...p,
-      stock: p.stock ?? 10,
+      stock: p.stock ?? 0,
       category: p.category || "all",
       department: p.department || "women",
       subcategory: p.subcategory || p.category,
@@ -83,7 +83,7 @@ const AdminOrders = () => {
     price: "",
     image: "",
     department: "women",
-    stock: "10",
+    stock: 0,
   });
 
   const toEthiopianDate = (dateString: string) => {
@@ -134,6 +134,7 @@ const AdminOrders = () => {
         String(item.id) === String(id) ? { ...item, price: priceNum } : item
       )
     );
+    window.dispatchEvent(new Event("storage")); // SYNC FIX
     toast({ title: "Price Saved" });
   };
 
@@ -142,9 +143,12 @@ const AdminOrders = () => {
     if (isNaN(stockNum)) return;
     setInventory((prev: any[]) =>
       prev.map((item) =>
-        String(item.id) === String(id) ? { ...item, stock: stockNum } : item
+        String(item.id) === String(id)
+          ? { ...item, stock: Math.max(0, stockNum) }
+          : item
       )
     );
+    window.dispatchEvent(new Event("storage")); // SYNC FIX
     toast({ title: "Stock Updated" });
   };
 
@@ -153,6 +157,7 @@ const AdminOrders = () => {
       setInventory((prev: any[]) =>
         prev.filter((p) => String(p.id) !== String(id))
       );
+      window.dispatchEvent(new Event("storage")); // SYNC FIX
       toast({ variant: "destructive", title: "Deleted" });
     }
   };
@@ -160,17 +165,18 @@ const AdminOrders = () => {
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault();
     const productToAdd = {
-      id: Date.now(),
+      id: Date.now().toString(),
       name: newProduct.name,
-      price: parseFloat(newProduct.price),
+      price: parseFloat(newProduct.price) || 0,
       image: newProduct.image,
-      stock: parseInt(newProduct.stock),
+      stock: parseInt(newProduct.stock.toString()) || 0,
       department: newProduct.department.toLowerCase(),
       category: newProduct.category,
       subcategory: newProduct.category,
       status: "active",
     };
     setInventory([productToAdd, ...inventory]);
+    window.dispatchEvent(new Event("storage")); // SYNC FIX
     setIsModalOpen(false);
     setNewProduct({
       name: "",
@@ -178,7 +184,7 @@ const AdminOrders = () => {
       price: "",
       image: "",
       department: "women",
-      stock: "10",
+      stock: 0,
     });
     toast({ title: "Product Added" });
   };
@@ -194,7 +200,8 @@ const AdminOrders = () => {
   const filteredProducts = useMemo(
     () =>
       inventory.filter((p: any) => {
-        const matchesSearch = p.name
+        const name = p.name || "";
+        const matchesSearch = name
           .toLowerCase()
           .includes(searchTerm.toLowerCase());
         const activeFilter = categoryFilter.toLowerCase();
@@ -387,7 +394,8 @@ const AdminOrders = () => {
               </thead>
               <tbody>
                 {filteredProducts.map((p: any) => {
-                  const isLowStock = Number(p.stock) <= 1;
+                  const stockValue = parseInt(p.stock) || 0;
+                  const isLowStock = stockValue <= 1;
                   return (
                     <tr
                       key={p.id}
@@ -405,7 +413,9 @@ const AdminOrders = () => {
                             {isLowStock && (
                               <span className="text-[10px] font-bold text-destructive uppercase flex items-center gap-1">
                                 <AlertTriangle size={10} />{" "}
-                                {p.stock === 0 ? "Out of Stock" : "Low Stock"}
+                                {stockValue === 0
+                                  ? "Out of Stock"
+                                  : "Low Stock"}
                               </span>
                             )}
                           </div>
@@ -415,7 +425,7 @@ const AdminOrders = () => {
                       <td>
                         <input
                           type="number"
-                          defaultValue={p.price.toFixed(0)}
+                          defaultValue={p.price}
                           onBlur={(e) => updatePrice(p.id, e.target.value)}
                           className="w-20 bg-transparent border-b border-border focus:border-primary outline-none font-bold"
                         />
@@ -448,7 +458,6 @@ const AdminOrders = () => {
           )}
         </div>
 
-        {/* Selected Order Receipt Modal */}
         {selectedOrder && (
           <div className="modal-overlay">
             <div className="modal-content">
@@ -512,7 +521,6 @@ const AdminOrders = () => {
           </div>
         )}
 
-        {/* Add Product Modal */}
         {isModalOpen && (
           <div className="modal-overlay">
             <div className="modal-content">
@@ -609,7 +617,10 @@ const AdminOrders = () => {
                       className="luxury-input"
                       value={newProduct.stock}
                       onChange={(e) =>
-                        setNewProduct({ ...newProduct, stock: e.target.value })
+                        setNewProduct({
+                          ...newProduct,
+                          stock: parseInt(e.target.value) || 0,
+                        })
                       }
                     />
                   </div>

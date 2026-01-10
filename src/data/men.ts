@@ -7,7 +7,8 @@ const createProducts = (
   images: string[],
   nameBase: string,
   sizes: string[],
-  basePrice: number
+  basePrice: number,
+  baseStock: number
 ): Product[] =>
   images.map((img, idx) => ({
     id: `${department}-${subcategory.toLowerCase()}-${idx + 1}`,
@@ -17,7 +18,7 @@ const createProducts = (
     subcategory,
     sizes,
     image: img,
-    stock: 10,
+    stock: baseStock,
   }));
 
 const WOMEN_SIZES = ['XS', 'S', 'M', 'L', 'XL'];
@@ -107,16 +108,16 @@ import wJeans4 from '@/assets/img/women/Jeans/images3.jfif';
 import wJeans5 from '@/assets/img/women/Jeans/item3.jpeg';
 
 export const menProducts: Product[] = [
-  ...createProducts('men', 'Belts', [wBelts1,wBelts2,wBelts3,wBelts4,wBelts5], 'men Belt', WOMEN_SIZES, 4),
-  ...createProducts('men', 'Caps_Hats', [wCaps1,wCaps2,wCaps3,wCaps4,wCaps5], 'men Cap/Hat', WOMEN_SIZES, 3),
-  ...createProducts('men', 'FootWear', [wFoot1,wFoot2,wFoot3,wFoot4,wFoot5], 'men Footwear', WOMEN_SIZES, 2),
-  ...createProducts('men', 'Hoodies_Sweaters', [wHood1,wHood2,wHood3,wHood4,wHood5], 'men Hoodie', WOMEN_SIZES, 12),
-  ...createProducts('men', 'Jackets_Coats', [wJacket1,wJacket2,wJacket3,wJacket4,wJacket5], 'men Jacket/Coat', WOMEN_SIZES, 19),
-  ...createProducts('men', 'Shirts', [wShirt1,wShirt2,wShirt3,wShirt4,wShirt5], 'men Shirt', WOMEN_SIZES, 15),
-  ...createProducts('men', 'Shorts', [wShort1,wShort2,wShort3,wShort4,wShort5], 'men Shorts', WOMEN_SIZES, 5),
-  ...createProducts('men', 'Suits_Tailoring', [wSuit1,wSuit2,wSuit3,wSuit4,wSuit5], 'men Suit', WOMEN_SIZES, 32),
-  ...createProducts('men', 'Tshirts', [wTee1,wTee2,wTee3,wTee4,wTee5], 'men T-Shirt', WOMEN_SIZES, 7),
-  ...createProducts('men', 'Underwear', [wUnder1,wUnder2,wUnder3,wUnder4,wUnder5], 'men Underwear', WOMEN_SIZES, 2),
-  ...createProducts('men', 'WaistCoats', [wWaist1,wWaist2,wWaist3,wWaist4,wWaist5], 'men WaistCoat', WOMEN_SIZES, 10),
-  ...createProducts('men', 'Jeans', [wJeans1,wJeans2,wJeans3,wJeans4,wJeans5], 'men Jeans', WOMEN_SIZES, 20),
+  ...createProducts('men', 'Belts', [wBelts1,wBelts2,wBelts3,wBelts4,wBelts5], 'men Belt', WOMEN_SIZES, 4, 2),
+  ...createProducts('men', 'Caps_Hats', [wCaps1,wCaps2,wCaps3,wCaps4,wCaps5], 'men Cap/Hat', WOMEN_SIZES, 3, 6),
+  ...createProducts('men', 'FootWear', [wFoot1,wFoot2,wFoot3,wFoot4,wFoot5], 'men Footwear', WOMEN_SIZES, 2, 15),
+  ...createProducts('men', 'Hoodies_Sweaters', [wHood1,wHood2,wHood3,wHood4,wHood5], 'men Hoodie', WOMEN_SIZES, 12, 15),
+  ...createProducts('men', 'Jackets_Coats', [wJacket1,wJacket2,wJacket3,wJacket4,wJacket5], 'men Jacket/Coat', WOMEN_SIZES, 19, 10),
+  ...createProducts('men', 'Shirts', [wShirt1,wShirt2,wShirt3,wShirt4,wShirt5], 'men Shirt', WOMEN_SIZES, 15, 10),
+  ...createProducts('men', 'Shorts', [wShort1,wShort2,wShort3,wShort4,wShort5], 'men Shorts', WOMEN_SIZES, 5, 10),
+  ...createProducts('men', 'Suits_Tailoring', [wSuit1,wSuit2,wSuit3,wSuit4,wSuit5], 'men Suit', WOMEN_SIZES, 32, 20),
+  ...createProducts('men', 'Tshirts', [wTee1,wTee2,wTee3,wTee4,wTee5], 'men T-Shirt', WOMEN_SIZES, 7, 13),
+  ...createProducts('men', 'Underwear', [wUnder1,wUnder2,wUnder3,wUnder4,wUnder5], 'men Underwear', WOMEN_SIZES, 2, 41),
+  ...createProducts('men', 'WaistCoats', [wWaist1,wWaist2,wWaist3,wWaist4,wWaist5], 'men WaistCoat', WOMEN_SIZES, 10, 17),
+  ...createProducts('men', 'Jeans', [wJeans1,wJeans2,wJeans3,wJeans4,wJeans5], 'men Jeans', WOMEN_SIZES, 20, 16),
 ];

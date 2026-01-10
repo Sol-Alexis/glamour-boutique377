@@ -6,7 +6,8 @@ const createProducts = (
   images: string[],
   nameBase: string,
   sizes: string[],
-  basePrice: number
+  basePrice: number,
+  baseStock: number
 ): Product[] =>
   images.map((img, idx) => ({
     id: `${department}-${subcategory.toLowerCase()}-${idx + 1}`,
@@ -16,7 +17,7 @@ const createProducts = (
     subcategory,
     sizes,
     image: img,
-    stock: 10,
+    stock: baseStock,
   }));
 
 const KIDS_SIZES = ['4Y', '6Y', '8Y', '10Y'];
@@ -106,16 +107,16 @@ import kjn4 from '@/assets/img/kids/Jeans/images.jfif';
 import kjn5 from '@/assets/img/kids/Jeans/pamper_pants.jpeg';
 
 export const kidsProducts: Product[] = [
-  ...createProducts('kids', 'Belts', [b1,b2,b3,b4,b5], 'Kids Belt', ['S','M','L'], 800),
-  ...createProducts('kids', 'Caps_Hats', [cap4,cap5,cap6,cap10,cap11], 'Kids Cap/Hat', KIDS_SIZES, 700),
-  ...createProducts('kids', 'FootWear', [booties,girlSandals,girlShoes,product,pumpsShoes], 'Kids Footwear', KIDS_SIZES, 950),
-  ...createProducts('kids', 'Hoodies_Sweaters', [kh1,kh2,kh3,kh4,kh5], 'Kids Hoodie', KIDS_SIZES, 800),
-  ...createProducts('kids', 'Jackets_Coats', [kj1,kj2,kj3,kj4,kj5], 'Kids Jacket/Coat', KIDS_SIZES, 1200),
-  ...createProducts('kids', 'Shirts', [ks1,ks2,ks3,ks4,ks5], 'Kids Shirt', KIDS_SIZES, 900),
-  ...createProducts('kids', 'Shorts', [ksh1,ksh2,ksh3,ksh4,ksh5], 'Kids Shorts', KIDS_SIZES, 850),
-  ...createProducts('kids', 'Suits_Tailoring', [kst1,kst2,kst3,kst4,kst5], 'Kids Suit', KIDS_SIZES, 1800),
-  ...createProducts('kids', 'Tshirts', [kt1,kt2,kt3,kt4,kt5], 'Kids T-Shirt', KIDS_SIZES, 700),
-  ...createProducts('kids', 'Underwear', [ku1,ku2,ku3,ku4,ku5], 'Kids Underwear', KIDS_SIZES, 500),
-  ...createProducts('kids', 'WaistCoats', [kw1,kw2,kw3,kw4,kw5], 'Kids WaistCoat', KIDS_SIZES, 1100),
-  ...createProducts('kids', 'Jeans', [kjn1,kjn2,kjn3,kjn4,kjn5], 'Kids Jeans', KIDS_SIZES, 950),
+  ...createProducts('kids', 'Belts', [b1,b2,b3,b4,b5], 'Kids Belt', ['S','M','L'], 800, 18),
+  ...createProducts('kids', 'Caps_Hats', [cap4,cap5,cap6,cap10,cap11], 'Kids Cap/Hat', KIDS_SIZES, 700, 17),
+  ...createProducts('kids', 'FootWear', [booties,girlSandals,girlShoes,product,pumpsShoes], 'Kids Footwear', KIDS_SIZES, 950, 21),
+  ...createProducts('kids', 'Hoodies_Sweaters', [kh1,kh2,kh3,kh4,kh5], 'Kids Hoodie', KIDS_SIZES, 800, 9),
+  ...createProducts('kids', 'Jackets_Coats', [kj1,kj2,kj3,kj4,kj5], 'Kids Jacket/Coat', KIDS_SIZES, 1200, 10),
+  ...createProducts('kids', 'Shirts', [ks1,ks2,ks3,ks4,ks5], 'Kids Shirt', KIDS_SIZES, 900, 13),
+  ...createProducts('kids', 'Shorts', [ksh1,ksh2,ksh3,ksh4,ksh5], 'Kids Shorts', KIDS_SIZES, 850, 13),
+  ...createProducts('kids', 'Suits_Tailoring', [kst1,kst2,kst3,kst4,kst5], 'Kids Suit', KIDS_SIZES, 1800, 22),
+  ...createProducts('kids', 'Tshirts', [kt1,kt2,kt3,kt4,kt5], 'Kids T-Shirt', KIDS_SIZES, 700, 11),
+  ...createProducts('kids', 'Underwear', [ku1,ku2,ku3,ku4,ku5], 'Kids Underwear', KIDS_SIZES, 500, 16),
+  ...createProducts('kids', 'WaistCoats', [kw1,kw2,kw3,kw4,kw5], 'Kids WaistCoat', KIDS_SIZES, 1100, 20),
+  ...createProducts('kids', 'Jeans', [kjn1,kjn2,kjn3,kjn4,kjn5], 'Kids Jeans', KIDS_SIZES, 950, 36),
 ];

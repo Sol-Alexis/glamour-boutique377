@@ -1,5 +1,11 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { Product } from '@/data/products';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { Product } from "@/data/products";
 
 export interface CartItem {
   product: Product;
@@ -21,12 +27,22 @@ export interface Order {
 interface CartContextType {
   items: CartItem[];
   orders: Order[];
-  addToCart: (product: Product, size: string, color: string, quantity?: number) => void;
+  addToCart: (
+    product: Product,
+    size: string,
+    color: string,
+    quantity?: number
+  ) => void;
   removeFromCart: (productId: string, size: string, color: string) => void;
-  updateQuantity: (productId: string, size: string, color: string, quantity: number) => void;
+  updateQuantity: (
+    productId: string,
+    size: string,
+    color: string,
+    quantity: number
+  ) => void;
   clearCart: () => void;
   addOrder: (order: Order) => void;
-  updateOrderStatus: (orderId: string, newStatus: string) => void; 
+  updateOrderStatus: (orderId: string, newStatus: string) => void;
   totalItems: number;
   totalPrice: number;
 }
@@ -35,31 +51,62 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
-  
+
   const [orders, setOrders] = useState<Order[]>(() => {
-    const savedOrders = localStorage.getItem('glamour_orders');
+    const savedOrders = localStorage.getItem("glamour_orders");
     return savedOrders ? JSON.parse(savedOrders) : [];
   });
 
   useEffect(() => {
-    localStorage.setItem('glamour_orders', JSON.stringify(orders));
+    localStorage.setItem("glamour_orders", JSON.stringify(orders));
   }, [orders]);
 
-  const addToCart = (product: Product, size: string, color: string, quantity = 1) => {
-    setItems(prev => {
+  /**
+   * ⭐ HELPER: Get Live Stock
+   * This function looks into the Admin Inventory (localStorage) to find
+   * the real stock limit for a specific product ID.
+   */
+  const getLiveStockLimit = (productId: string, fallbackStock: number) => {
+    const savedInventory = localStorage.getItem("glamour_inventory");
+    if (savedInventory) {
+      const inventory = JSON.parse(savedInventory);
+      const liveProduct = inventory.find(
+        (p: any) => String(p.id) === String(productId)
+      );
+      if (liveProduct) return Number(liveProduct.stock);
+    }
+    return fallbackStock;
+  };
+
+  const addToCart = (
+    product: Product,
+    size: string,
+    color: string,
+    quantity = 1
+  ) => {
+    const stockLimit = getLiveStockLimit(product.id, product.stock ?? 0);
+    if (stockLimit <= 0) return;
+    setItems((prev) => {
       const existingItem = prev.find(
-        item => item.product.id === product.id && item.size === size && item.color === color
+        (item) =>
+          item.product.id === product.id &&
+          item.size === size &&
+          item.color === color
       );
 
-      const stockLimit = product.stock ?? 10;
+      const stockLimit = product.stock ?? 0;
 
       if (existingItem) {
-        return prev.map(item => {
-          if (item.product.id === product.id && item.size === size && item.color === color) {
+        return prev.map((item) => {
+          if (
+            item.product.id === product.id &&
+            item.size === size &&
+            item.color === color
+          ) {
             const newQuantity = item.quantity + quantity;
-            return { 
-              ...item, 
-              quantity: newQuantity > stockLimit ? stockLimit : newQuantity 
+            return {
+              ...item,
+              quantity: newQuantity > stockLimit ? stockLimit : newQuantity,
             };
           }
           return item;
@@ -67,26 +114,54 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
 
       const initialQuantity = quantity > stockLimit ? stockLimit : quantity;
-      return [...prev, { product, size, color, quantity: initialQuantity, addedAt: new Date() }];
+      return [
+        ...prev,
+        {
+          product,
+          size,
+          color,
+          quantity: initialQuantity,
+          addedAt: new Date(),
+        },
+      ];
     });
   };
 
   const removeFromCart = (productId: string, size: string, color: string) => {
-    setItems(prev =>
-      prev.filter(item => !(item.product.id === productId && item.size === size && item.color === color))
+    setItems((prev) =>
+      prev.filter(
+        (item) =>
+          !(
+            item.product.id === productId &&
+            item.size === size &&
+            item.color === color
+          )
+      )
     );
   };
 
-  const updateQuantity = (productId: string, size: string, color: string, quantity: number) => {
+  const updateQuantity = (
+    productId: string,
+    size: string,
+    color: string,
+    quantity: number
+  ) => {
     if (quantity <= 0) {
       removeFromCart(productId, size, color);
       return;
     }
 
-    setItems(prev =>
-      prev.map(item => {
-        if (item.product.id === productId && item.size === size && item.color === color) {
-          const stockLimit = item.product.stock ?? 10;
+    setItems((prev) =>
+      prev.map((item) => {
+        if (
+          item.product.id === productId &&
+          item.size === size &&
+          item.color === color
+        ) {
+          const stockLimit = getLiveStockLimit(
+            productId,
+            item.product.stock ?? 0
+          );
           const finalQuantity = quantity > stockLimit ? stockLimit : quantity;
           return { ...item, quantity: finalQuantity };
         }
@@ -100,10 +175,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   // --- UPDATED ADD ORDER FUNCTION ---
   const addOrder = (order: Order) => {
     // 1. Add order to state/history
-    setOrders(prev => [order, ...prev]);
+    setOrders((prev) => [order, ...prev]);
 
     // 2. Reduce Stock in Inventory
-    const savedInventory = localStorage.getItem('glamour_inventory');
+    const savedInventory = localStorage.getItem("glamour_inventory");
     if (savedInventory) {
       let inventory = JSON.parse(savedInventory);
 
@@ -116,23 +191,23 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (productIndex !== -1) {
           const currentStock = Number(inventory[productIndex].stock) || 0;
           const boughtQty = Number(orderItem.quantity);
-          
+
           // Deduct the quantity bought
           inventory[productIndex].stock = Math.max(0, currentStock - boughtQty);
         }
       });
 
       // Update the central inventory storage
-      localStorage.setItem('glamour_inventory', JSON.stringify(inventory));
-      
+      localStorage.setItem("glamour_inventory", JSON.stringify(inventory));
+
       // Notify other parts of the app (like AdminOrders) that inventory changed
-      window.dispatchEvent(new Event('storage'));
+      window.dispatchEvent(new Event("storage"));
     }
   };
 
   const updateOrderStatus = (orderId: string, newStatus: string) => {
-    setOrders(prev => 
-      prev.map(order => 
+    setOrders((prev) =>
+      prev.map((order) =>
         order.id === orderId ? { ...order, status: newStatus } : order
       )
     );
@@ -154,7 +229,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         updateQuantity,
         clearCart,
         addOrder,
-        updateOrderStatus, 
+        updateOrderStatus,
         totalItems,
         totalPrice,
       }}
@@ -166,6 +241,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) throw new Error('useCart must be used within a CartProvider');
+  if (!context) throw new Error("useCart must be used within a CartProvider");
   return context;
 };

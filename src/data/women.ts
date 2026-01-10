@@ -6,7 +6,8 @@ const createProducts = (
   images: string[],
   nameBase: string,
   sizes: string[],
-  basePrice: number
+  basePrice: number,
+  baseStock: number
 ): Product[] =>
   images.map((img, idx) => ({
     id: `${department}-${subcategory.toLowerCase()}-${idx + 1}`,
@@ -16,7 +17,7 @@ const createProducts = (
     subcategory,
     sizes,
     image: img,
-    stock: 10,
+    stock: baseStock,
   }));
 
 const MEN_SIZES = ['S', 'M', 'L', 'XL'];
@@ -105,16 +106,16 @@ import mjn4 from '@/assets/img/men/Jeans/download11.jfif';
 import mjn5 from '@/assets/img/men/Jeans/images2.jfif';
 
 export const womenProducts: Product[] = [
-  ...createProducts('women', 'Belts', [mb1,mb2,mb3,mb4,mb5], 'Women Belt', MEN_SIZES, 3),
-  ...createProducts('women', 'Caps_Hats', [mc1,mc2,mc3,mc4,mc5], 'Women Cap/Hat', MEN_SIZES, 3),
+  ...createProducts('women', 'Belts', [mb1,mb2,mb3,mb4,mb5], 'Women Belt', MEN_SIZES, 3, 14),
+  ...createProducts('women', 'Caps_Hats', [mc1,mc2,mc3,mc4,mc5], 'Women Cap/Hat', MEN_SIZES, 3, 23),
   ...createProducts('women', 'FootWear', [mf1,mf2,mf3,mf4,mf5], 'Women Footwear', MEN_SIZES, 2),
-  ...createProducts('women', 'Hoodies_Sweaters', [mh1,mh2,mh3,mh4,mh5], 'Women Hoodie', MEN_SIZES, 13),
-  ...createProducts('women', 'Jackets_Coats', [mj1,mj2,mj3,mj4,mj5], 'Women Jacket/Coat', MEN_SIZES, 18),
-  ...createProducts('women', 'Shirts', [ms1,ms2,ms3,ms4,ms5], 'Women Shirt', MEN_SIZES, 10),
-  ...createProducts('women', 'Shorts', [msh1,msh2,msh3,msh4,msh5], 'Women Shorts', MEN_SIZES, 6),
-  ...createProducts('women', 'Suits_Tailoring', [mst1,mst2,mst3,mst4,mst5], 'Women Suit', MEN_SIZES, 30),
-  ...createProducts('women', 'Tshirts', [mt1,mt2,mt3,mt4,mt5], 'Women T-Shirt', MEN_SIZES, 5),
-  ...createProducts('women', 'Underwear', [mu1,mu2,mu3,mu4], 'Women Underwear', MEN_SIZES, 4),
-  ...createProducts('women', 'WaistCoats', [mw1,mw2,mw3,mw4,mw5], 'Women WaistCoat', MEN_SIZES, 9),
-  ...createProducts('women', 'Jeans', [mjn1,mjn2,mjn3,mjn4,mjn5], 'Women Jeans', MEN_SIZES, 13),
+  ...createProducts('women', 'Hoodies_Sweaters', [mh1,mh2,mh3,mh4,mh5], 'Women Hoodie', MEN_SIZES, 13, 7),
+  ...createProducts('women', 'Jackets_Coats', [mj1,mj2,mj3,mj4,mj5], 'Women Jacket/Coat', MEN_SIZES, 18, 9),
+  ...createProducts('women', 'Shirts', [ms1,ms2,ms3,ms4,ms5], 'Women Shirt', MEN_SIZES, 10, 9),
+  ...createProducts('women', 'Shorts', [msh1,msh2,msh3,msh4,msh5], 'Women Shorts', MEN_SIZES, 6, 14),
+  ...createProducts('women', 'Suits_Tailoring', [mst1,mst2,mst3,mst4,mst5], 'Women Suit', MEN_SIZES, 30, 67),
+  ...createProducts('women', 'Tshirts', [mt1,mt2,mt3,mt4,mt5], 'Women T-Shirt', MEN_SIZES, 5, 20),
+  ...createProducts('women', 'Underwear', [mu1,mu2,mu3,mu4], 'Women Underwear', MEN_SIZES, 4, 21),
+  ...createProducts('women', 'WaistCoats', [mw1,mw2,mw3,mw4,mw5], 'Women WaistCoat', MEN_SIZES, 9, 17),
+  ...createProducts('women', 'Jeans', [mjn1,mjn2,mjn3,mjn4,mjn5], 'Women Jeans', MEN_SIZES, 13, 23),
 ];
