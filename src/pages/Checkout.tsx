@@ -23,11 +23,17 @@ const Checkout = () => {
   const buyNowItem = (location.state as any)?.buyNowItem;
   const checkoutItems = buyNowItem ? [buyNowItem] : items;
 
+  if (checkoutItems.length === 0) {
+    navigate("/");
+
+    return null;
+  }
+
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
+    firstName: user?.firstName || "", // if you store it in AuthContext
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    phone: user?.phone || "",
     address: "",
     city: "",
     state: "",
@@ -35,7 +41,6 @@ const Checkout = () => {
   });
 
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
-  const [userEnteredAmount, setUserEnteredAmount] = useState("");
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -61,19 +66,10 @@ const Checkout = () => {
     formData.state;
 
   const handleConfirmPayment = () => {
-    if (!userEnteredAmount) {
-      toast({
-        title: "Amount Required",
-        description: "Please enter the amount you transferred.",
-        variant: "destructive",
-      });
-      return;
-    }
     setPaymentConfirmed(true);
-    setUserEnteredAmount("");
     toast({
       title: "Payment Registered",
-      description: "Transfer confirmed. You can now place your order.",
+      description: `Transfer of ${finalTotal.toLocaleString()} ETB confirmed.`,
     });
   };
 
@@ -91,38 +87,74 @@ const Checkout = () => {
 
     const savedInventory = localStorage.getItem("glamour_inventory");
     if (savedInventory) {
+      const inventory = JSON.parse(savedInventory);
+
+      for (const cartItem of checkoutItems) {
+        const productId = cartItem.product?.id || cartItem.id;
+        const requestedQty = cartItem.quantity || 1;
+
+        const inventoryItem = inventory.find(
+          (p: any) => String(p.id) === String(productId),
+        );
+
+        const availableStock = inventoryItem
+          ? Number(inventoryItem.stock)
+          : (cartItem.product?.stock ?? 0);
+
+        if (requestedQty > availableStock) {
+          toast({
+            title: "Stock Changed",
+            description: `"${cartItem.product?.name}" now has only ${availableStock} item(s) left.`,
+            variant: "destructive",
+          });
+          return; // ❌ STOP ORDER
+        }
+      }
+    }
+
+    // ===============================
+    // 2️⃣ STOCK DEDUCTION
+    // ===============================
+    if (savedInventory) {
       let inventory = JSON.parse(savedInventory);
       checkoutItems.forEach((cartItem) => {
         const productIndex = inventory.findIndex(
           (p: any) =>
-            String(p.id) === String(cartItem.product?.id || cartItem.id)
+            String(p.id) === String(cartItem.product?.id || cartItem.id),
         );
         if (productIndex !== -1) {
           const currentStock = Number(inventory[productIndex].stock) || 0;
           inventory[productIndex].stock = Math.max(
             0,
-            currentStock - (cartItem.quantity || 1)
+            currentStock - (cartItem.quantity || 1),
           );
         }
       });
       localStorage.setItem("glamour_inventory", JSON.stringify(inventory));
     }
 
-    const newOrder = {
+    const newOrder: Order = {
       id: `ORD-${Math.floor(Math.random() * 9000) + 1000}`,
-      customerEmail: formData.email,
       items: [...checkoutItems],
       total: finalTotal,
       status: "Processing",
       date: new Date().toISOString(),
-      paymentMethod: formData.paymentMethod,
+      paymentMethod:
+        formData.paymentMethod === "cbe" ? "CBE Bank Transfer" : "Telebirr",
+      customerEmail: formData.email,
       customerName: `${formData.firstName} ${formData.lastName}`,
-      phone: formData.phone,
-      address: `${formData.address}, ${formData.city}`,
+      customerPhone: formData.phone, // ← add this
+      customerAddress: `${formData.address}, ${formData.city}, ${formData.state}`, // ← add this
     };
 
-    addOrder(newOrder);
+    addOrder(newOrder); // This now triggers the LocalStorage save we fixed
     if (!buyNowItem) clearCart();
+
+    toast({
+      title: "Order Placed!",
+      description: "Your order has been saved to your history.",
+    });
+
     navigate("/order-success", { state: { order: newOrder } });
   };
 
@@ -318,14 +350,13 @@ const Checkout = () => {
                               Transfer Amount
                             </Label>
                             <Input
-                              type="number"
-                              placeholder="Enter Amount"
-                              value={userEnteredAmount}
-                              onChange={(e) =>
-                                setUserEnteredAmount(e.target.value)
-                              }
-                              className="border-primary bg-background font-bold h-12 text-foreground"
+                              readOnly
+                              value={`${finalTotal.toLocaleString()} ETB`}
+                              className="bg-muted font-bold h-12 text-foreground border-none"
                             />
+                            <p className="text-xs text-muted-foreground">
+                              Please transfer the exact amount shown above.
+                            </p>
                           </div>
                         </div>
                         <Button
@@ -380,19 +411,19 @@ const Checkout = () => {
 
                   <div className="border-t border-border pt-4 space-y-2">
                     <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>Subtotal</span>
+                      <span>Subtotal: </span>
                       <span className="text-foreground">
                         {subtotalETB.toLocaleString()} ETB
                       </span>
                     </div>
                     <div className="flex justify-between text-sm text-muted-foreground">
-                      <span>Shipping</span>
+                      <span>Shipping: </span>
                       <span className="text-foreground">
                         {shippingCost === 0 ? "Free" : `${shippingCost} ETB`}
                       </span>
                     </div>
                     <div className="flex justify-between font-bold text-xl pt-4 border-t border-border mt-2 text-foreground">
-                      <span>Total</span>
+                      <span>Total: </span>
                       <span className="text-primary">
                         {finalTotal.toLocaleString()} ETB
                       </span>

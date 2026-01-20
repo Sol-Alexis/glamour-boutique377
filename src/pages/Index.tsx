@@ -141,7 +141,7 @@ const Index = ({ department = "all" }: IndexProps) => {
     if (directProductId) {
       const allProducts = getAllCurrentProducts("all", "all");
       const targetProduct = allProducts.find(
-        (p) => p.id.toString() === directProductId
+        (p) => p.id.toString() === directProductId,
       );
 
       if (targetProduct) {
@@ -149,7 +149,7 @@ const Index = ({ department = "all" }: IndexProps) => {
         setCurrentDepartment(safeDept);
         setSelectedCategory(targetProduct.category);
         setDisplayedProducts(
-          getAllCurrentProducts(safeDept, targetProduct.category)
+          getAllCurrentProducts(safeDept, targetProduct.category),
         );
         setSelectedProduct(targetProduct);
 
@@ -258,7 +258,7 @@ const Index = ({ department = "all" }: IndexProps) => {
 
     navigate("/checkout", {
       state: {
-        directPurchase: {
+        buyNowItem: {
           product: selectedProduct,
           size: selectedSize || "original",
           color: selectedColor || "standard",
@@ -278,26 +278,26 @@ const Index = ({ department = "all" }: IndexProps) => {
     const localData = localStorage.getItem("glamour_inventory");
     const localProducts = localData ? JSON.parse(localData) : [];
     const liveEntry = localProducts.find(
-      (p: any) => String(p.id) === String(selectedProduct.id)
+      (p: any) => String(p.id) === String(selectedProduct.id),
     );
 
     // Use Admin stock if it exists, otherwise use the product's own stock
     const availableStock = liveEntry
       ? Number(liveEntry.stock)
-      : selectedProduct.stock ?? 0;
+      : (selectedProduct.stock ?? 0);
 
     const itemInCart = items.find(
       (item) =>
         String(item.product.id) === String(selectedProduct.id) &&
         item.size === targetSize &&
-        item.color === targetColor
+        item.color === targetColor,
     );
 
     const currentQty = itemInCart ? itemInCart.quantity : 0;
 
     if (currentQty >= availableStock) {
       setLimitMessage(
-        `Limit reached! You already have ${currentQty} units of this item in your cart.`
+        `Limit reached! You already have ${currentQty} units of this item in your cart.`,
       );
       // Clear message after 3 seconds
       setTimeout(() => setLimitMessage(null), 3000);
@@ -425,9 +425,9 @@ const Index = ({ department = "all" }: IndexProps) => {
           className="selected-product-view animate-in fade-in duration-500 py-16 border-t"
         >
                    {" "}
-          <div className="product-focus-container flex flex-col gap-12 p-8 max-w-[1200px] mx-auto bg-white/50 backdrop-blur-sm rounded-3xl">
+          <div className="product-focus-container flex flex-col md:flex-row gap-16 p-8 max-w-[1200px] mx-auto bg-white/50 backdrop-blur-sm rounded-3xl">
                                     {/* LARGE PRODUCT IMAGE */}           {" "}
-            <div className="w-full flex justify-center">
+            <div className="w-full flex justify-center md:pl-8">
                            {" "}
               <img
                 src={selectedProduct.image}
@@ -437,15 +437,15 @@ const Index = ({ department = "all" }: IndexProps) => {
                     selectedSize === "XL" || selectedSize === "XXL"
                       ? "scale(1.1)"
                       : selectedSize === "XS" || selectedSize === "S"
-                      ? "scale(0.9)"
-                      : "scale(1)",
+                        ? "scale(0.9)"
+                        : "scale(1)",
                 }}
                 className="w-full max-w-[500px] h-auto rounded-2xl shadow-2xl object-cover transition-transform duration-500"
               />
                          {" "}
             </div>
             {/* INFO */}
-            <div className="text-center">
+            <div className="w-full md:w-1/2 flex flex-col gap-6 md:text-left text-center">
               <span className="text-xs uppercase tracking-[0.2em] text-muted-foreground">
                 {(selectedProduct.category || "").replace("_", " & ")}
               </span>

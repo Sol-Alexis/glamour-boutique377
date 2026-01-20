@@ -1,16 +1,15 @@
 /* ---------------- MODERN ACTION ROW & FILTERS ---------------- */
-
-/* The Main Row Wrapper */
 .modern-action-row {
   display: flex;
   flex-direction: row;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between; /* prevents stacking & covering */
   gap: 1rem;
   width: 90%;
-  max-width: 1200px; 
+  max-width: 1200px;
   margin: 3rem auto;
-  background-color: transparent; /* Let Layout handle background */
+  padding: 0 1rem; /* 🔑 left & right breathing space */
+  background-color: transparent;
 }
 
 .action-item {

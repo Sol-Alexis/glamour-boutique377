@@ -6,13 +6,20 @@ import React, {
   useEffect,
 } from "react";
 import { Product } from "@/data/products";
+import { useAuth } from "@/context/AuthContext";
+
+const getCartKey = (email?: string) =>
+  email ? `glamour_cart_${email}` : "glamour_cart_guest";
+
+const getOrdersKey = (email?: string) =>
+  email ? `glamour_orders_${email}` : "glamour_orders_guest";
 
 export interface CartItem {
   product: Product;
   quantity: number;
   size: string;
   color: string;
-  addedAt: Date;
+  addedAt: string; // store as ISO string
 }
 
 export interface Order {
@@ -20,8 +27,12 @@ export interface Order {
   items: CartItem[];
   total: number;
   status: string;
-  date: Date;
+  date: string;
   paymentMethod: string;
+  customerEmail?: string;
+  customerName: string;
+  customerPhone?: string; // ← add this
+  customerAddress?: string;
 }
 
 interface CartContextType {
@@ -31,14 +42,14 @@ interface CartContextType {
     product: Product,
     size: string,
     color: string,
-    quantity?: number
+    quantity?: number,
   ) => void;
   removeFromCart: (productId: string, size: string, color: string) => void;
   updateQuantity: (
     productId: string,
     size: string,
     color: string,
-    quantity: number
+    quantity: number,
   ) => void;
   clearCart: () => void;
   addOrder: (order: Order) => void;
@@ -49,102 +60,159 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
+const CART_EXPIRY_DAYS = 7;
+const CART_EXPIRY_MS = CART_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [items, setItems] = useState<CartItem[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]); // Only define this ONCE
+  const [isInitialized, setIsInitialized] = useState(false);
+  const { user } = useAuth();
 
-  const [orders, setOrders] = useState<Order[]>(() => {
-    const savedOrders = localStorage.getItem("glamour_orders");
-    return savedOrders ? JSON.parse(savedOrders) : [];
-  });
-
+  /* ------------------ LOAD DATA (ONCE) ------------------ */
   useEffect(() => {
-    localStorage.setItem("glamour_orders", JSON.stringify(orders));
-  }, [orders]);
+    const cartKey = getCartKey(user?.email);
+    const ordersKey = getOrdersKey(user?.email);
 
-  /**
-   * ⭐ HELPER: Get Live Stock
-   * This function looks into the Admin Inventory (localStorage) to find
-   * the real stock limit for a specific product ID.
-   */
+    const savedCart = localStorage.getItem(cartKey);
+    const savedOrders = localStorage.getItem(ordersKey);
+
+    setItems(savedCart ? JSON.parse(savedCart) : []);
+    setOrders(savedOrders ? JSON.parse(savedOrders) : []);
+
+    setIsInitialized(true);
+  }, [user]);
+
+  /* ------------------ SAVE CART ------------------ */
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    const cartKey = getCartKey(user?.email);
+    localStorage.setItem(cartKey, JSON.stringify(items));
+  }, [items, isInitialized, user]);
+
+  /* ------------------ SAVE ORDERS ------------------ */
+  useEffect(() => {
+    if (!isInitialized) return;
+
+    // Save the current user's orders
+    const ordersKey = getOrdersKey(user?.email);
+    localStorage.setItem(ordersKey, JSON.stringify(orders));
+
+    // ALSO save to global orders for admin
+    const allOrdersKey = "glamour_orders_all";
+    const savedAllOrders = localStorage.getItem(allOrdersKey);
+    const allOrders = savedAllOrders ? JSON.parse(savedAllOrders) : [];
+
+    // Merge current orders with global orders, avoiding duplicates
+    const updatedAllOrders = [
+      ...orders,
+      ...allOrders.filter(
+        (o: Order) => !orders.some((u: Order) => u.id === o.id),
+      ),
+    ];
+
+    localStorage.setItem(allOrdersKey, JSON.stringify(updatedAllOrders));
+  }, [orders, isInitialized, user]);
+
+  /* ------------------ AUTO-EXPIRE CART ITEMS ------------------ */
+  useEffect(() => {
+    const now = Date.now();
+    let inventory = JSON.parse(
+      localStorage.getItem("glamour_inventory") || "[]",
+    );
+
+    const validItems = items.filter((item) => {
+      const addedTime = new Date(item.addedAt).getTime();
+      const expired = now - addedTime > CART_EXPIRY_MS;
+
+      if (expired) {
+        const index = inventory.findIndex(
+          (p: any) => String(p.id) === String(item.product.id),
+        );
+        if (index !== -1) {
+          inventory[index].stock += item.quantity;
+        }
+      }
+
+      return !expired;
+    });
+
+    if (validItems.length !== items.length) {
+      localStorage.setItem("glamour_inventory", JSON.stringify(inventory));
+      setItems(validItems);
+    }
+  }, [items]);
+
+  /* ------------------ STOCK HELPER ------------------ */
   const getLiveStockLimit = (productId: string, fallbackStock: number) => {
     const savedInventory = localStorage.getItem("glamour_inventory");
     if (savedInventory) {
       const inventory = JSON.parse(savedInventory);
       const liveProduct = inventory.find(
-        (p: any) => String(p.id) === String(productId)
+        (p: any) => String(p.id) === String(productId),
       );
       if (liveProduct) return Number(liveProduct.stock);
     }
     return fallbackStock;
   };
 
+  /* ------------------ ADD TO CART ------------------ */
   const addToCart = (
     product: Product,
     size: string,
     color: string,
-    quantity = 1
+    quantity = 1,
   ) => {
     const stockLimit = getLiveStockLimit(product.id, product.stock ?? 0);
     if (stockLimit <= 0) return;
+
     setItems((prev) => {
-      const existingItem = prev.find(
-        (item) =>
-          item.product.id === product.id &&
-          item.size === size &&
-          item.color === color
+      const existing = prev.find(
+        (i) =>
+          i.product.id === product.id && i.size === size && i.color === color,
       );
 
-      const stockLimit = product.stock ?? 0;
-
-      if (existingItem) {
-        return prev.map((item) => {
-          if (
-            item.product.id === product.id &&
-            item.size === size &&
-            item.color === color
-          ) {
-            const newQuantity = item.quantity + quantity;
-            return {
-              ...item,
-              quantity: newQuantity > stockLimit ? stockLimit : newQuantity,
-            };
-          }
-          return item;
-        });
+      if (existing) {
+        return prev.map((item) =>
+          item === existing
+            ? {
+                ...item,
+                quantity: Math.min(item.quantity + quantity, stockLimit),
+              }
+            : item,
+        );
       }
 
-      const initialQuantity = quantity > stockLimit ? stockLimit : quantity;
       return [
         ...prev,
         {
           product,
           size,
           color,
-          quantity: initialQuantity,
-          addedAt: new Date(),
+          quantity: Math.min(quantity, stockLimit),
+          addedAt: new Date().toISOString(),
         },
       ];
     });
   };
 
+  /* ------------------ REMOVE ------------------ */
   const removeFromCart = (productId: string, size: string, color: string) => {
     setItems((prev) =>
       prev.filter(
-        (item) =>
-          !(
-            item.product.id === productId &&
-            item.size === size &&
-            item.color === color
-          )
-      )
+        (i) =>
+          !(i.product.id === productId && i.size === size && i.color === color),
+      ),
     );
   };
 
+  /* ------------------ UPDATE QTY ------------------ */
   const updateQuantity = (
     productId: string,
     size: string,
     color: string,
-    quantity: number
+    quantity: number,
   ) => {
     if (quantity <= 0) {
       removeFromCart(productId, size, color);
@@ -152,71 +220,60 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
 
     setItems((prev) =>
-      prev.map((item) => {
-        if (
-          item.product.id === productId &&
-          item.size === size &&
-          item.color === color
-        ) {
-          const stockLimit = getLiveStockLimit(
-            productId,
-            item.product.stock ?? 0
-          );
-          const finalQuantity = quantity > stockLimit ? stockLimit : quantity;
-          return { ...item, quantity: finalQuantity };
-        }
-        return item;
-      })
+      prev.map((item) =>
+        item.product.id === productId &&
+        item.size === size &&
+        item.color === color
+          ? {
+              ...item,
+              quantity: Math.min(
+                quantity,
+                getLiveStockLimit(productId, item.product.stock ?? 0),
+              ),
+            }
+          : item,
+      ),
     );
   };
 
-  const clearCart = () => setItems([]);
+  const clearCart = () => {
+    setItems([]);
+    localStorage.removeItem(getCartKey(user?.email));
+  };
 
-  // --- UPDATED ADD ORDER FUNCTION ---
+  /* ------------------ ADD ORDER ------------------ */
   const addOrder = (order: Order) => {
-    // 1. Add order to state/history
+    // Add to the current user's orders
     setOrders((prev) => [order, ...prev]);
 
-    // 2. Reduce Stock in Inventory
-    const savedInventory = localStorage.getItem("glamour_inventory");
-    if (savedInventory) {
-      let inventory = JSON.parse(savedInventory);
-
-      order.items.forEach((orderItem) => {
-        // Find the index of the product in the master inventory list
-        const productIndex = inventory.findIndex(
-          (p: any) => String(p.id) === String(orderItem.product.id)
-        );
-
-        if (productIndex !== -1) {
-          const currentStock = Number(inventory[productIndex].stock) || 0;
-          const boughtQty = Number(orderItem.quantity);
-
-          // Deduct the quantity bought
-          inventory[productIndex].stock = Math.max(0, currentStock - boughtQty);
-        }
-      });
-
-      // Update the central inventory storage
-      localStorage.setItem("glamour_inventory", JSON.stringify(inventory));
-
-      // Notify other parts of the app (like AdminOrders) that inventory changed
-      window.dispatchEvent(new Event("storage"));
+    // Save to the current user's orders in localStorage
+    if (user) {
+      const userOrdersKey = getOrdersKey(user.email);
+      const savedUserOrders = localStorage.getItem(userOrdersKey);
+      const userOrders = savedUserOrders ? JSON.parse(savedUserOrders) : [];
+      localStorage.setItem(
+        userOrdersKey,
+        JSON.stringify([order, ...userOrders]),
+      );
     }
+
+    // Save to global orders for admin
+    const allOrdersKey = "glamour_orders_all";
+    const savedAllOrders = localStorage.getItem(allOrdersKey);
+    const allOrders = savedAllOrders ? JSON.parse(savedAllOrders) : [];
+    localStorage.setItem(allOrdersKey, JSON.stringify([order, ...allOrders]));
   };
 
   const updateOrderStatus = (orderId: string, newStatus: string) => {
     setOrders((prev) =>
-      prev.map((order) =>
-        order.id === orderId ? { ...order, status: newStatus } : order
-      )
+      prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)),
     );
   };
 
-  const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+  const totalItems = items.reduce((s, i) => s + i.quantity, 0);
   const totalPrice = items.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
-    0
+    (s, i) => s + i.product.price * i.quantity,
+    0,
   );
 
   return (
@@ -241,6 +298,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
 export const useCart = () => {
   const context = useContext(CartContext);
-  if (!context) throw new Error("useCart must be used within a CartProvider");
+  if (!context) throw new Error("useCart must be used within CartProvider");
   return context;
 };

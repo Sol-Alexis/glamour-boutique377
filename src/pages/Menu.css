@@ -60,10 +60,18 @@
   display: flex;
   flex-direction: column;
   height: 100%;
+  overflow-y: auto;          /* ENABLE SCROLL */
+  padding-right: 0.25rem;    /* Prevent scrollbar overlap */
+  scroll-behavior: smooth;
 }
+
 
 /* Profile Section Styling */
 .menu-profile {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: hsl(var(--background));
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -153,6 +161,7 @@
 .menu-footer {
   margin-top: auto; /* Pushes sign out to bottom */
   padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .menu-item.signout {
@@ -225,4 +234,43 @@
   border-bottom: 1px solid #f0f0f0;
   padding-bottom: 15px;
   margin-bottom: 15px;
+}
+/* ===================== */
+/* FAQ SECTION STYLES */
+/* ===================== */
+
+.section-label.underline {
+  text-decoration: underline;
+}
+
+/* Each FAQ item */
+.faq-item {
+  border-bottom: 1px solid hsl(var(--border));
+  padding-bottom: 0.25rem;
+}
+
+/* FAQ answer text */
+.faq-answer {
+  font-size: 0.85rem;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.5;
+}
+
+/* FAQ button hover consistency */
+.faq-item .menu-item:hover {
+  background-color: hsl(var(--muted));
+}
+/* Chrome, Edge, Safari */
+.menu-content::-webkit-scrollbar {
+  display: none;
+}
+
+/* Firefox */
+.menu-content {
+  scrollbar-width: none;
+}
+
+/* Keep scrolling enabled */
+.menu-content {
+  overflow-y: auto;
 }

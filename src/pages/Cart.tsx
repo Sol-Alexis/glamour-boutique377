@@ -7,6 +7,22 @@ import { useCart } from "@/context/CartContext";
 import { toEthiopianDate } from "@/lib/ethiopianCalendar";
 import "./Cart.css";
 
+const getExpiryInfo = (addedAt: string) => {
+  const EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+  const addedTime = new Date(addedAt).getTime();
+  const expiryTime = addedTime + EXPIRY_MS;
+  const remaining = expiryTime - Date.now();
+
+  if (remaining <= 0) return null;
+
+  const days = Math.floor(remaining / (24 * 60 * 60 * 1000));
+  const hours = Math.floor(
+    (remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000),
+  );
+
+  return { days, hours };
+};
+
 const Cart = () => {
   const { items, updateQuantity, removeFromCart, totalPrice } = useCart();
   const navigate = useNavigate();
@@ -63,18 +79,18 @@ const Cart = () => {
               const itemKey = `${item.product.id}-${item.size}-${item.color}`;
               const isConfirming = confirmingRemove === itemKey;
               const isActuallyRemoved = removedItems.includes(itemKey);
-
+              const expiry = getExpiryInfo(item.addedAt);
               // --- THE FIX: LOOK UP LIVE STOCK FOR THIS SPECIFIC ITEM ---
               const localData = localStorage.getItem("glamour_inventory");
               const localProducts = localData ? JSON.parse(localData) : [];
               const liveProduct = localProducts.find(
-                (p: any) => String(p.id) === String(item.product.id)
+                (p: any) => String(p.id) === String(item.product.id),
               );
 
               // Use live stock from Admin, fallback to initial product stock, default to 0
               const stockLimit = liveProduct
                 ? Number(liveProduct.stock)
-                : item.product.stock ?? 0;
+                : (item.product.stock ?? 0);
 
               const isAtMaxStock = item.quantity >= stockLimit;
               const isSoldOut = stockLimit <= 0;
@@ -123,7 +139,7 @@ const Cart = () => {
                                 handleRemove(
                                   item.product.id,
                                   item.size,
-                                  item.color
+                                  item.color,
                                 )
                               }
                               className="text-[11px] font-black hover:underline"
@@ -166,6 +182,23 @@ const Cart = () => {
                       )}
                     </div>
 
+                    {expiry && (
+                      <p
+                        className={`text-[10px] font-bold mt-1 uppercase tracking-wide ${
+                          expiry.days <= 1
+                            ? "text-red-600 animate-pulse"
+                            : expiry.days <= 2
+                              ? "text-orange-500"
+                              : "text-muted-foreground"
+                        }`}
+                      >
+                        ⏳ Expires in{" "}
+                        {expiry.days > 0
+                          ? `${expiry.days} day${expiry.days > 1 ? "s" : ""}`
+                          : `${expiry.hours} hour${expiry.hours > 1 ? "s" : ""}`}
+                      </p>
+                    )}
+
                     <div className="cart-item-footer">
                       <div className="flex flex-col items-start gap-1">
                         <div className="cart-quantity">
@@ -175,7 +208,7 @@ const Cart = () => {
                                 item.product.id,
                                 item.size,
                                 item.color,
-                                item.quantity - 1
+                                item.quantity - 1,
                               )
                             }
                             disabled={isSoldOut}
@@ -192,7 +225,7 @@ const Cart = () => {
                                   item.product.id,
                                   item.size,
                                   item.color,
-                                  item.quantity + 1
+                                  item.quantity + 1,
                                 );
                               }
                             }}

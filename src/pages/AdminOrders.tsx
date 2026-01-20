@@ -39,16 +39,31 @@ const GLAMOUR_CATEGORIES = [
 ];
 
 const AdminOrders = () => {
-  const { orders, updateOrderStatus } = useCart();
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
   const { user } = useAuth();
   const { toast } = useToast();
+  const { orders, updateOrderStatus } = useCart();
   const navigate = useNavigate();
+  const [adminProfile, setAdminProfile] = useState<{
+    name?: string;
+    image?: string;
+    email?: string;
+  }>(() => {
+    const saved = localStorage.getItem("glamour_admin_profile");
+    return saved
+      ? JSON.parse(saved)
+      : { name: "Admin", email: user?.email || "" };
+  });
 
   const [activeTab, setActiveTab] = useState<"orders" | "products">("orders");
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
+
+  // Modals & Selection
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [saveMessage, setSaveMessage] = useState("");
 
   const [inventory, setInventory] = useState(() => {
     const saved = localStorage.getItem("glamour_inventory");
@@ -61,6 +76,21 @@ const AdminOrders = () => {
       subcategory: p.subcategory || p.category,
     }));
   });
+
+  const handleUpdateOrderStatus = (orderId: string, newStatus: string) => {
+    setAllOrders((prev) =>
+      prev.map((o) => (o.id === orderId ? { ...o, status: newStatus } : o)),
+    );
+
+    // Persist to localStorage
+    const allOrdersKey = "glamour_orders_all";
+    const savedAllOrders = localStorage.getItem(allOrdersKey);
+    const allOrdersStored = savedAllOrders ? JSON.parse(savedAllOrders) : [];
+    const updatedAllOrders = allOrdersStored.map((o: Order) =>
+      o.id === orderId ? { ...o, status: newStatus } : o,
+    );
+    localStorage.setItem(allOrdersKey, JSON.stringify(updatedAllOrders));
+  };
 
   useEffect(() => {
     if (!user || !isUserAdmin(user.email)) {
@@ -76,6 +106,35 @@ const AdminOrders = () => {
   useEffect(() => {
     localStorage.setItem("glamour_inventory", JSON.stringify(inventory));
   }, [inventory]);
+
+  useEffect(() => {
+    const savedAllOrders = localStorage.getItem("glamour_orders_all");
+    setAllOrders(savedAllOrders ? JSON.parse(savedAllOrders) : []);
+  }, []);
+
+  useEffect(() => {
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key === "glamour_orders_all") {
+        setAllOrders(e.newValue ? JSON.parse(e.newValue) : []);
+      }
+    };
+    window.addEventListener("storage", handleStorage);
+    return () => window.removeEventListener("storage", handleStorage);
+  }, []);
+
+  useEffect(() => {
+    const loadProfile = () => {
+      const savedProfile = localStorage.getItem("glamour_admin_profile");
+      if (savedProfile) setAdminProfile(JSON.parse(savedProfile));
+    };
+
+    // Initial load
+    loadProfile();
+
+    // Listen for updates
+    window.addEventListener("storage", loadProfile);
+    return () => window.removeEventListener("storage", loadProfile);
+  }, []);
 
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -113,7 +172,7 @@ const AdminOrders = () => {
       if (timestamp < startOfYear.getTime())
         startOfYear.setFullYear(gregorianYear - 1);
       const diffDays = Math.floor(
-        (timestamp - startOfYear.getTime()) / (1000 * 60 * 60 * 24)
+        (timestamp - startOfYear.getTime()) / (1000 * 60 * 60 * 24),
       );
       const ethiopianMonth = months[Math.floor(diffDays / 30)] || "Meskerem";
       const ethiopianDay = (diffDays % 30) + 1;
@@ -123,16 +182,18 @@ const AdminOrders = () => {
     }
   };
 
-  const totalRevenue = orders.reduce((acc, order) => acc + order.total, 0);
-  const pendingOrders = orders.filter((o) => o.status === "Processing").length;
+  const totalRevenue = allOrders.reduce((acc, order) => acc + order.total, 0);
+  const pendingOrders = allOrders.filter(
+    (o) => o.status === "Processing",
+  ).length;
 
   const updatePrice = (id: string | number, newPrice: string) => {
     const priceNum = parseFloat(newPrice);
     if (isNaN(priceNum)) return;
     setInventory((prev: any[]) =>
       prev.map((item) =>
-        String(item.id) === String(id) ? { ...item, price: priceNum } : item
-      )
+        String(item.id) === String(id) ? { ...item, price: priceNum } : item,
+      ),
     );
     window.dispatchEvent(new Event("storage")); // SYNC FIX
     toast({ title: "Price Saved" });
@@ -145,8 +206,8 @@ const AdminOrders = () => {
       prev.map((item) =>
         String(item.id) === String(id)
           ? { ...item, stock: Math.max(0, stockNum) }
-          : item
-      )
+          : item,
+      ),
     );
     window.dispatchEvent(new Event("storage")); // SYNC FIX
     toast({ title: "Stock Updated" });
@@ -155,7 +216,7 @@ const AdminOrders = () => {
   const deleteProduct = (id: string | number) => {
     if (window.confirm("Are you sure you want to remove this item?")) {
       setInventory((prev: any[]) =>
-        prev.filter((p) => String(p.id) !== String(id))
+        prev.filter((p) => String(p.id) !== String(id)),
       );
       window.dispatchEvent(new Event("storage")); // SYNC FIX
       toast({ variant: "destructive", title: "Deleted" });
@@ -191,10 +252,10 @@ const AdminOrders = () => {
 
   const filteredOrders = useMemo(
     () =>
-      orders.filter((order) =>
-        order.id.toLowerCase().includes(searchTerm.toLowerCase())
+      allOrders.filter((order) =>
+        order.id.toLowerCase().includes(searchTerm.toLowerCase()),
       ),
-    [orders, searchTerm]
+    [allOrders, searchTerm],
   );
 
   const filteredProducts = useMemo(
@@ -210,7 +271,7 @@ const AdminOrders = () => {
           activeFilter === "all" || productDept === activeFilter;
         return matchesSearch && matchesCategory;
       }),
-    [inventory, searchTerm, categoryFilter]
+    [inventory, searchTerm, categoryFilter],
   );
 
   return (
@@ -223,21 +284,128 @@ const AdminOrders = () => {
               Managing Glamour Boutique Ethiopia.
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button
-              className="download-btn"
-              variant="outline"
-              onClick={() => window.print()}
-            >
-              <Download size={18} /> Print Report
-            </Button>
-            {activeTab === "products" && (
-              <Button onClick={() => setIsModalOpen(true)}>
-                + Add Product
+
+          {/* ---------- Admin Profile + Buttons ---------- */}
+          <div className="flex items-center gap-6 mb-10 pb-4">
+            <div className="flex items-center gap-3">
+              <img
+                src={adminProfile.image || "/default-avatar.jfif"}
+                alt="Admin"
+                className="w-8 h-8 rounded-full object-cover border"
+              />
+              <div className="flex flex-col leading-tight">
+                <span className="font-semibold text-sm">
+                  {adminProfile.name || "Admin"}
+                </span>
+                {adminProfile.email && (
+                  <span className="text-xs text-muted-foreground">
+                    {adminProfile.email}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="ml-auto flex flex-col space-y-4">
+              {/* Edit Profile */}
+              <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+
+              {/* Print Report */}
+              <Button
+                className="download-btn"
+                variant="outline"
+                onClick={() => window.print()}
+              >
+                <Download size={18} /> Print Report
               </Button>
-            )}
+
+              {activeTab === "products" && (
+                <Button onClick={() => setIsModalOpen(true)}>
+                  + Add Product
+                </Button>
+              )}
+            </div>
           </div>
         </div>
+
+        {/* ---------- Edit Profile Modal ---------- */}
+        {isEditing && (
+          <div className="modal-overlay fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+            <div className="modal-content bg-white p-6 pb-8 rounded-md w-80 relative">
+              <button
+                onClick={() => setIsEditing(false)}
+                className="absolute top-3 right-3"
+              >
+                <X size={20} />
+              </button>
+
+              <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Name</label>
+                  <input
+                    type="text"
+                    value={adminProfile.name || ""}
+                    onChange={(e) =>
+                      setAdminProfile({
+                        ...adminProfile,
+                        name: e.target.value,
+                      })
+                    }
+                    className="border rounded px-2 py-1 w-full"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1">
+                    Profile Image
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        setAdminProfile({
+                          ...adminProfile,
+                          image: reader.result as string,
+                        });
+                      };
+                      reader.readAsDataURL(file);
+                    }}
+                    className="w-full"
+                  />
+                </div>
+
+                <div>
+                  <Button
+                    className="w-full"
+                    onClick={() => {
+                      localStorage.setItem(
+                        "glamour_admin_profile",
+                        JSON.stringify(adminProfile),
+                      );
+                      setSaveMessage("Profile Updated!");
+                      setTimeout(() => {
+                        setSaveMessage("");
+                        setIsEditing(false); // close modal
+                      }, 1500);
+                    }}
+                  >
+                    Save
+                  </Button>
+                  {saveMessage && (
+                    <p className="text-green-600 font-medium mt-2 text-center">
+                      {saveMessage}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="stats-grid">
           <div className="stat-card">
@@ -255,7 +423,7 @@ const AdminOrders = () => {
             </div>
             <div>
               <p className="stat-label">Orders</p>
-              <h3 className="stat-value">{orders.length}</h3>
+              <h3 className="stat-value">{allOrders.length}</h3>
             </div>
           </div>
           <div className="stat-card">
@@ -360,7 +528,7 @@ const AdminOrders = () => {
                         className="status-select"
                         value={order.status}
                         onChange={(e) =>
-                          updateOrderStatus(order.id, e.target.value)
+                          handleUpdateOrderStatus(order.id, e.target.value)
                         }
                       >
                         <option value="Processing">Processing</option>
@@ -457,7 +625,6 @@ const AdminOrders = () => {
             </table>
           )}
         </div>
-
         {selectedOrder && (
           <div className="modal-overlay">
             <div className="modal-content">
@@ -472,16 +639,38 @@ const AdminOrders = () => {
                   <X />
                 </button>
               </div>
+
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="opacity-60">Date:</span>
                   <span>{toEthiopianDate(selectedOrder.date)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="opacity-60">Customer:</span>
-                  <span>{selectedOrder.customerName || "Guest User"}</span>
+
+                {/* ------------------ Customer Info ------------------ */}
+                <div className="user-info-section p-4 rounded-md border border-border bg-muted/20 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="opacity-60">Customer Name:</span>
+                    <span>{selectedOrder.customerName || "Guest User"}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="opacity-60">Email:</span>
+                    <span>{selectedOrder.customerEmail || "N/A"}</span>
+                  </div>
+                  {selectedOrder.customerPhone && (
+                    <div className="flex justify-between text-sm">
+                      <span className="opacity-60">Phone:</span>
+                      <span>{selectedOrder.customerPhone}</span>
+                    </div>
+                  )}
+                  {selectedOrder.customerAddress && (
+                    <div className="flex justify-between text-sm">
+                      <span className="opacity-60">Address:</span>
+                      <span>{selectedOrder.customerAddress}</span>
+                    </div>
+                  )}
                 </div>
 
+                {/* ------------------ Ordered Items ------------------ */}
                 <div className="py-4 border-y border-border space-y-3">
                   {selectedOrder.items.map((item: any, i: number) => (
                     <div
@@ -509,11 +698,13 @@ const AdminOrders = () => {
                   ))}
                 </div>
 
+                {/* ------------------ Total ------------------ */}
                 <div className="flex justify-between font-black text-xl pt-2">
                   <span>TOTAL</span>
                   <span>{selectedOrder.total.toLocaleString()} ETB</span>
                 </div>
               </div>
+
               <Button className="w-full mt-8" onClick={() => window.print()}>
                 Print Delivery Note
               </Button>
@@ -524,124 +715,113 @@ const AdminOrders = () => {
         {isModalOpen && (
           <div className="modal-overlay">
             <div className="modal-content">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-black uppercase tracking-tighter">
-                  New Boutique Item
-                </h2>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="p-2 bg-muted rounded-full"
+              {/* Close button */}
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="close-circle"
+              >
+                <X size={20} />
+              </button>
+
+              <h2 className="text-2xl font-black uppercase tracking-tighter text-center mb-6">
+                New Boutique Item
+              </h2>
+
+              <form onSubmit={handleAddProduct} className="form-full">
+                <label className="text-[10px] font-bold uppercase opacity-50 mb-1">
+                  Product Name
+                </label>
+                <input
+                  required
+                  type="text"
+                  className="luxury-input"
+                  value={newProduct.name}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
+                  }
+                />
+
+                <label className="text-[10px] font-bold uppercase opacity-50 mb-1">
+                  Department
+                </label>
+                <select
+                  className="luxury-input"
+                  value={newProduct.department}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, department: e.target.value })
+                  }
                 >
-                  <X size={20} />
-                </button>
-              </div>
-              <form onSubmit={handleAddProduct} className="space-y-4">
-                <div>
-                  <label className="text-[10px] font-bold uppercase opacity-50 block mb-1">
-                    Product Name
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    className="luxury-input"
-                    value={newProduct.name}
-                    onChange={(e) =>
-                      setNewProduct({ ...newProduct, name: e.target.value })
-                    }
-                  />
+                  <option value="women">Women</option>
+                  <option value="men">Men</option>
+                  <option value="kids">Kids</option>
+                </select>
+
+                <label className="text-[10px] font-bold uppercase opacity-50 mb-1">
+                  Category
+                </label>
+                <select
+                  className="luxury-input scrollable"
+                  value={newProduct.category}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, category: e.target.value })
+                  }
+                >
+                  {GLAMOUR_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>
+                      {c.replace("_", " & ")}
+                    </option>
+                  ))}
+                </select>
+
+                <label className="text-[10px] font-bold uppercase opacity-50 mb-1">
+                  Price (ETB)
+                </label>
+                <input
+                  required
+                  type="number"
+                  className="luxury-input"
+                  value={newProduct.price}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, price: e.target.value })
+                  }
+                />
+
+                <label className="text-[10px] font-bold uppercase opacity-50 mb-1">
+                  Stock
+                </label>
+                <input
+                  required
+                  type="number"
+                  className="luxury-input"
+                  value={newProduct.stock}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      stock: parseInt(e.target.value) || 0,
+                    })
+                  }
+                />
+
+                <label className="text-[10px] font-bold uppercase opacity-50 mb-1">
+                  Image URL
+                </label>
+                <input
+                  required
+                  type="text"
+                  className="luxury-input"
+                  value={newProduct.image}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, image: e.target.value })
+                  }
+                />
+                <div className="flex justify-center mt-4">
+                  <Button
+                    type="submit"
+                    className="w-28 h-10 font-bold text-lg mt-4 bg-red-600 text-white hover:bg-red-700"
+                  >
+                    Publish to Boutique
+                  </Button>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-bold uppercase opacity-50 block mb-1">
-                      Department
-                    </label>
-                    <select
-                      className="luxury-input"
-                      value={newProduct.department}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          department: e.target.value,
-                        })
-                      }
-                    >
-                      <option value="women">Women</option>
-                      <option value="men">Men</option>
-                      <option value="kids">Kids</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold uppercase opacity-50 block mb-1">
-                      Category
-                    </label>
-                    <select
-                      className="luxury-input"
-                      value={newProduct.category}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          category: e.target.value,
-                        })
-                      }
-                    >
-                      {GLAMOUR_CATEGORIES.map((c) => (
-                        <option key={c} value={c}>
-                          {c.replace("_", " & ")}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] font-bold uppercase opacity-50 block mb-1">
-                      Price (ETB)
-                    </label>
-                    <input
-                      required
-                      type="number"
-                      className="luxury-input"
-                      value={newProduct.price}
-                      onChange={(e) =>
-                        setNewProduct({ ...newProduct, price: e.target.value })
-                      }
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[10px] font-bold uppercase opacity-50 block mb-1">
-                      Stock
-                    </label>
-                    <input
-                      required
-                      type="number"
-                      className="luxury-input"
-                      value={newProduct.stock}
-                      onChange={(e) =>
-                        setNewProduct({
-                          ...newProduct,
-                          stock: parseInt(e.target.value) || 0,
-                        })
-                      }
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold uppercase opacity-50 block mb-1">
-                    Image URL
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    className="luxury-input"
-                    value={newProduct.image}
-                    onChange={(e) =>
-                      setNewProduct({ ...newProduct, image: e.target.value })
-                    }
-                  />
-                </div>
-                <Button type="submit" className="w-full h-14 font-bold text-lg">
-                  Publish to Boutique
-                </Button>
               </form>
             </div>
           </div>

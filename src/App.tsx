@@ -12,18 +12,18 @@ import Cart from "./pages/Cart";
 import Checkout from "./pages/Checkout";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
-import ShopLanding from './pages/ShopLanding';
-import Settings from './pages/Settings';
-import Orders from './pages/Orders';
-import OrderSuccess from './pages/OrderSuccess'; // Import Order Success
-import AdminOrders from './pages/AdminOrders';   // Import Admin Dashboard
-
+import ShopLanding from "./pages/ShopLanding";
+import Settings from "./pages/Settings";
+import Orders from "./pages/Orders";
+import OrderSuccess from "./pages/OrderSuccess"; // Import Order Success
+import AdminOrders from "./pages/AdminOrders"; // Import Admin Dashboard
+import AdminProfile from "./pages/AdminProfile";
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <CartProvider>
-      <AuthProvider>
+    <AuthProvider>
+      <CartProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -37,16 +37,25 @@ const App = () => (
               <Route path="/kids" element={<Index department="kids" />} />
 
               {/* Category-specific pages WITH department */}
-              <Route path="/men/:category" element={<Products department="men" />} />
-              <Route path="/women/:category" element={<Products department="women" />} />
-              <Route path="/kids/:category" element={<Products department="kids" />} />
+              <Route
+                path="/men/:category"
+                element={<Products department="men" />}
+              />
+              <Route
+                path="/women/:category"
+                element={<Products department="women" />}
+              />
+              <Route
+                path="/kids/:category"
+                element={<Products department="kids" />}
+              />
 
               {/* Category-specific pages WITHOUT department → show all */}
               <Route path="/categories" element={<Index />} />
-              
+
               <Route path="/products" element={<Products department="all" />} />
               <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/cart" element={<Cart />} /> 
+              <Route path="/cart" element={<Cart />} />
               <Route path="/shop" element={<ShopLanding />} />
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order-success" element={<OrderSuccess />} />
@@ -56,14 +65,14 @@ const App = () => (
 
               {/* Admin Routes - Keep these "secret" */}
               <Route path="/admin/orders" element={<AdminOrders />} />
-
+              <Route path="/admin/profile" element={<AdminProfile />} />
               {/* Catch-all Not Found */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
-      </AuthProvider>
-    </CartProvider>
+      </CartProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
